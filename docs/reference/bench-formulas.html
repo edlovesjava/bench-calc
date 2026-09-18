@@ -1,0 +1,649 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Bench Formulas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#EEF2F4; --surface:#FFFFFF; --ink:#13202A; --muted:#56697A; --rule:#CFD9E0;
+  --accent:#0B6E8A; --accent-soft:#DCEEF3; --warn:#9A4A16; --warn-soft:#F7E8DB;
+  --eqbg:#F4F8FA; --grid:#DCE4E9;
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1418; --surface:#151E24; --ink:#E1E9EE; --muted:#93A6B4; --rule:#26343D;
+    --accent:#56C2DC; --accent-soft:#16323B; --warn:#F0A060; --warn-soft:#33251B;
+    --eqbg:#111A1F; --grid:#22303A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1418; --surface:#151E24; --ink:#E1E9EE; --muted:#93A6B4; --rule:#26343D;
+  --accent:#56C2DC; --accent-soft:#16323B; --warn:#F0A060; --warn-soft:#33251B;
+  --eqbg:#111A1F; --grid:#22303A;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:1120px;margin:0 auto}
+header.top{padding-block:36px 18px;display:grid;gap:6px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(40px,7vw,64px);line-height:.95;margin:0;letter-spacing:.01em;text-transform:uppercase}
+.lede{margin:6px 0 0;max-width:68ch;color:var(--muted)}
+.lede b{color:var(--ink);font-weight:600}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--rule);padding-block:10px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.search{flex:1 1 220px;max-width:340px;position:relative}
+.search input{width:100%;font:inherit;font-family:var(--f-mono);font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:7px 34px 7px 10px}
+.search input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.search kbd{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--f-mono);font-size:11px;color:var(--muted);border:1px solid var(--rule);border-radius:4px;padding:0 5px}
+nav.jump{display:flex;gap:6px;overflow-x:auto;flex:1 1 400px;scrollbar-width:thin;padding-bottom:2px}
+nav.jump a{flex:none;font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;color:var(--muted);padding:3px 9px;border:1px solid var(--rule);border-radius:4px;background:var(--surface)}
+nav.jump a:hover,nav.jump a:focus-visible{color:var(--accent);border-color:var(--accent);outline:none}
+.nomatch{padding:24px 0;color:var(--muted);font-family:var(--f-mono)}
+
+section.grp{margin-top:34px;scroll-margin-top:72px}
+.grp-head{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--ink);padding-bottom:4px}
+.grp-head h2{font-family:var(--f-display);font-weight:700;font-size:26px;text-transform:uppercase;letter-spacing:.04em;margin:0;text-wrap:balance}
+.grp-head span{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+
+.entry{display:grid;grid-template-columns:minmax(0,1fr);gap:14px 32px;padding-block:22px;border-bottom:1px solid var(--rule);scroll-margin-top:72px}
+@media (min-width:880px){.entry{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.entry h3{font-family:var(--f-display);font-weight:600;font-size:21px;letter-spacing:.02em;margin:0 0 8px;text-wrap:balance}
+.eq{font-family:var(--f-mono);font-weight:500;font-size:18px;line-height:1.5;color:var(--accent);margin:0 0 12px;overflow-x:auto}
+.eq div+div{margin-top:2px}
+sub{font-size:.72em;line-height:0}
+dl.syms{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:3px 14px;margin:0 0 12px;font-size:14px}
+dl.syms dt{font-family:var(--f-mono);font-weight:500;white-space:nowrap}
+dl.syms dd{margin:0;color:var(--muted)}
+.ds{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0;font-size:12px;color:var(--muted)}
+.ds .lbl{font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.06em;margin-right:2px}
+.tag{font-family:var(--f-mono);font-size:12.5px;color:var(--accent);background:var(--accent-soft);border-radius:3px;padding:1px 6px}
+p.note{margin:10px 0 0;font-size:14px;max-width:62ch}
+
+.work{background:var(--eqbg);border:1px solid var(--rule);border-radius:6px;padding:12px 14px;align-self:start;min-width:0}
+.work .lbl{font-family:var(--f-mono);font-size:12px;letter-spacing:.02em;color:var(--muted);margin-bottom:6px}
+.work pre{margin:0;font-family:var(--f-mono);font-size:13.5px;line-height:1.6;white-space:pre;overflow-x:auto;font-variant-numeric:tabular-nums;color:var(--ink)}
+.work pre b{color:var(--accent);font-weight:500}
+.warn{margin:10px 0 0;font-size:13.5px;background:var(--warn-soft);color:var(--ink);border-radius:4px;padding:7px 10px}
+.warn::before{content:"Watch out: ";font-weight:600;color:var(--warn)}
+
+table.t{border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.tscroll{overflow-x:auto}
+table.t th,table.t td{text-align:left;padding:4px 14px 4px 0;border-bottom:1px solid var(--rule)}
+table.t th{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+table.t td.m{font-family:var(--f-mono);white-space:nowrap}
+
+figure.rc{margin:0}
+figure.rc svg{width:100%;height:auto;max-width:560px;display:block}
+figure.rc figcaption{font-size:13px;color:var(--muted);margin-top:4px}
+.ax{stroke:var(--muted);stroke-width:1}
+.gl{stroke:var(--grid);stroke-width:1}
+.curve{fill:none;stroke:var(--accent);stroke-width:2.5}
+.dot{fill:var(--accent)}
+.txt{fill:var(--muted);font-family:var(--f-mono);font-size:11px}
+.txt-i{fill:var(--ink);font-family:var(--f-mono);font-size:11.5px;font-weight:500}
+
+footer{margin-top:40px;font-size:13px;color:var(--muted);max-width:75ch}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Ed’s bench reference</div>
+  <h1>Bench Formulas</h1>
+  <p class="lede">Each entry gives the formula, what every symbol means (with units), the <b>datasheet parameter names</b> it connects to, and a <b>worked example with the arithmetic shown</b>, using parts from your bench where they fit. Datasheet figures below are typical/max values quoted for orientation; check the sheet for the exact part you have.</p>
+</header>
+
+<div class="bar">
+  <div class="search"><label for="q" class="eyebrow" style="position:absolute;left:-9999px">Filter formulas</label><input id="q" type="search" placeholder="Filter: ripple, TL431, dB…" autocomplete="off"><kbd>/</kbd></div>
+  <nav class="jump" aria-label="Sections">
+    <a href="#units">Units</a><a href="#resistors">Resistors</a><a href="#supplies">Supplies</a><a href="#reactive">C &amp; L</a><a href="#buck">Buck</a><a href="#refs">Comparators &amp; refs</a><a href="#switches">Switches</a><a href="#signals">Signals</a>
+  </nav>
+</div>
+<p class="nomatch" id="nomatch" hidden>No entries match that filter.</p>
+
+<!-- ============ UNITS ============ -->
+<section class="grp" id="units">
+  <div class="grp-head"><h2>Units &amp; mental math</h2><span>prefixes · shortcuts</span></div>
+
+  <article class="entry" data-k="si prefix pico nano micro milli kilo mega">
+    <div>
+      <h3>SI prefixes</h3>
+      <div class="tscroll"><table class="t">
+        <thead><tr><th>Prefix</th><th>Symbol</th><th>Factor</th><th>Where you meet it</th></tr></thead>
+        <tbody>
+          <tr><td>pico</td><td class="m">p</td><td class="m">10⁻¹²</td><td>small ceramic caps, stray capacitance</td></tr>
+          <tr><td>nano</td><td class="m">n</td><td class="m">10⁻⁹</td><td>film caps, gate charge (nC), switching (ns)</td></tr>
+          <tr><td>micro</td><td class="m">µ (or u)</td><td class="m">10⁻⁶</td><td>electrolytics (µF), inductors (µH), bias currents (µA)</td></tr>
+          <tr><td>milli</td><td class="m">m</td><td class="m">10⁻³</td><td>LED currents (mA), R<sub>DS(on)</sub> (mΩ), power (mW)</td></tr>
+          <tr><td>kilo</td><td class="m">k</td><td class="m">10³</td><td>resistors (kΩ), switching frequency (kHz)</td></tr>
+          <tr><td>mega</td><td class="m">M</td><td class="m">10⁶</td><td>pull-ups on CMOS inputs (MΩ), clock frequencies (MHz)</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Cap code “104” = 10 followed by 4 zeros, in pF = 100 000 pF = 100 nF = 0.1 µF.</p>
+    </div>
+    <div class="work">
+      <div class="lbl">Unit pairs that cancel cleanly</div>
+<pre>mA  × kΩ  = <b>V</b>      3 mA × 1 kΩ   = 3 V
+V   ÷ kΩ  = <b>mA</b>     5 V  ÷ 10 kΩ  = 0.5 mA
+V   × mA  = <b>mW</b>     3 V  × 3 mA   = 9 mW
+kΩ  × µF  = <b>ms</b>     10 k × 100 µF = 1000 ms
+µH  ÷ Ω   = <b>µs</b>     100 µH ÷ 0.1 Ω = 1000 µs
+nC  ÷ mA  = <b>µs</b>     29 nC ÷ 4.5 mA = 6.4 µs</pre>
+      <p class="note">Why these work: 10⁻³ × 10³ = 1, 10³ × 10⁻⁶ = 10⁻³, and so on. Pick the pair and the exponents disappear.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============ RESISTORS ============ -->
+<section class="grp" id="resistors">
+  <div class="grp-head"><h2>Resistors</h2><span>Ohm · power · LEDs · dividers</span></div>
+
+  <article class="entry" data-k="ohm law power watt dissipation derate">
+    <div>
+      <h3>Ohm’s law &amp; power</h3>
+      <div class="eq"><div>V = I · R</div><div>P = V · I = I² · R = V² / R</div></div>
+      <dl class="syms">
+        <dt>V</dt><dd>voltage across the resistor, volts (V)</dd>
+        <dt>I</dt><dd>current through it, amps (A)</dd>
+        <dt>R</dt><dd>resistance, ohms (Ω) = V/A</dd>
+        <dt>P</dt><dd>power turned into heat, watts (W) = V·A</dd>
+      </dl>
+      <p class="ds"><span class="lbl">Datasheet</span><span class="tag">Power rating @ 70 °C</span><span class="tag">Tolerance</span><span class="tag">Max working voltage</span></p>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked · 100 Ω across 5 V</div>
+<pre>I = V / R  = 5 / 100      = 50 mA
+P = V² / R = 25 / 100     = <b>0.25 W</b>
+P = I² · R = 0.05² × 100  = 0.25 W  ✓</pre>
+      <p class="warn">A common through-hole resistor is rated ¼ W = 250 mW. This example sits exactly at the limit and will run hot. Keep dissipation at or below about half the rating, so use a ½ W part here.</p>
+    </div>
+  </article>
+
+  <article class="entry" data-k="led series resistor forward voltage vf if power led">
+    <div>
+      <h3>LED series resistor</h3>
+      <div class="eq"><div>R = (V<sub>supply</sub> − V<sub>F</sub>) / I<sub>F</sub></div></div>
+      <dl class="syms">
+        <dt>V<sub>supply</sub></dt><dd>rail feeding the LED + resistor (V)</dd>
+        <dt>V<sub>F</sub></dt><dd>LED forward voltage at the chosen current (V). Red ≈ 1.8–2.2 V; green/blue/white ≈ 2.8–3.3 V</dd>
+        <dt>I<sub>F</sub></dt><dd>LED forward current (A)</dd>
+      </dl>
+      <p class="ds"><span class="lbl">Datasheet</span><span class="tag">V<sub>F</sub> @ I<sub>F</sub></span><span class="tag">I<sub>F</sub> max (continuous)</span><span class="tag">Luminous intensity @ I<sub>F</sub></span></p>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked · power LED on your L7805 board (5 V, 1 kΩ)</div>
+<pre>assume red LED, V<sub>F</sub> ≈ 2.0 V
+I = (5 − 2.0) / 1000     = <b>3 mA</b>
+P<sub>R</sub> = I² · R = (0.003)² × 1000 = 9 mW
+P<sub>LED</sub> = V<sub>F</sub> · I = 2.0 × 3 mA = 6 mW</pre>
+      <p class="note">3 mA is plenty for an indicator. Modern LEDs are clearly visible at 1–2 mA, and datasheets usually quote brightness at 20 mA.</p>
+    </div>
+  </article>
+
+  <article class="entry" data-k="voltage divider thevenin parallel source impedance load">
+    <div>
+      <h3>Voltage divider</h3>
+      <div class="eq"><div>V<sub>out</sub> = V<sub>in</sub> · R2 / (R1 + R2)</div><div>R<sub>source</sub> = R1 ∥ R2 = R1·R2 / (R1 + R2)</div></div>
+      <dl class="syms">
+        <dt>R1</dt><dd>top resistor, from V<sub>in</sub> to the output node (Ω)</dd>
+        <dt>R2</dt><dd>bottom resistor, from the output node to ground (Ω)</dd>
+        <dt>R<sub>source</sub></dt><dd>the resistance the output “looks like” to whatever it drives (Thevenin resistance)</dd>
+      </dl>
+      <p class="ds"><span class="lbl">Datasheet (load side)</span><span class="tag">Input bias current I<sub>IB</sub></span><span class="tag">Input resistance</span></p>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked · 2.5 V reference for a comparator from 5 V</div>
+<pre>R1 = R2 = 10 kΩ
+V<sub>out</sub> = 5 × 10k / 20k       = <b>2.5 V</b>
+R<sub>source</sub> = 10k·10k / 20k    = 5 kΩ
+load should be ≥ 10 × 5 kΩ = 50 kΩ</pre>
+      <p class="warn">A load of 5 kΩ would itself sit in parallel with R2: 10k ∥ 5k = 3.33 k, so V<sub>out</sub> = 5 × 3.33/13.33 = 1.25 V, half of what you designed.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============ SUPPLIES ============ -->
+<section class="grp" id="supplies">
+  <div class="grp-head"><h2>Linear supplies</h2><span>regulator heat · diode drop</span></div>
+
+  <article class="entry" data-k="linear regulator l7805 7805 dropout thermal heatsink junction temperature rthja efficiency">
+    <div>
+      <h3>Linear regulator: dissipation &amp; junction temperature</h3>
+      <div class="eq"><div>P = (V<sub>in</sub> − V<sub>out</sub>) · I<sub>out</sub></div><div>T<sub>J</sub> = T<sub>A</sub> + P · R<sub>thJA</sub></div><div>V<sub>in(min)</sub> = V<sub>out</sub> + V<sub>drop</sub></div></div>
+      <dl class="syms">
+        <dt>V<sub>in</sub></dt><dd>voltage at the regulator’s input pin (after any series diode) (V)</dd>
+        <dt>I<sub>out</sub></dt><dd>load current (A). The small quiescent current adds a little more</dd>
+        <dt>R<sub>thJA</sub></dt><dd>thermal resistance, junction to ambient air, no heatsink (°C/W): degrees of temperature rise per watt</dd>
+        <dt>T<sub>A</sub>, T<sub>J</sub></dt><dd>ambient and silicon (junction) temperature (°C)</dd>
+        <dt>V<sub>drop</sub></dt><dd>dropout: minimum headroom before regulation fails (V)</dd>
+      </dl>
+      <p class="ds"><span class="lbl">Datasheet (ST L7805, TO-220)</span><span class="tag">R<sub>thJA</sub> 50 °C/W</span><span class="tag">R<sub>thJC</sub> 5 °C/W</span><span class="tag">V<sub>d</sub> 2 V typ @ 1 A</span><span class="tag">T<sub>OP</sub> 0–125 °C (C grade)</span><span class="tag">I<sub>d</sub> quiescent</span></p>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked · your 9 V barrel → diode → L7805 → 5 V</div>
+<pre>V<sub>in</sub> = 9 − 0.8 (series diode)   = 8.2 V
+headroom = 8.2 − 5 = 3.2 V  ≥ 2 V ✓
+
+@ 200 mA: P = 3.2 × 0.2      = 0.64 W
+          T<sub>J</sub> = 25 + 0.64 × 50  = <b>57 °C</b>
+@ 500 mA: P = 3.2 × 0.5      = 1.6 W
+          T<sub>J</sub> = 25 + 1.6 × 50   = <b>105 °C</b>
+
+efficiency (reg)   = 5 / 8.2 = 61 %
+efficiency (board) = 5 / 9   = 56 %</pre>
+      <p class="warn">At 500 mA it is 20 °C from the 125 °C limit with no heatsink, and thermal shutdown will cut out on a warm day. A heatsink swaps R<sub>thJA</sub> for R<sub>thJC</sub> + R<sub>case-sink</sub> + R<sub>sink-air</sub>, e.g. 5 + 1 + 10 = 16 °C/W → T<sub>J</sub> = 25 + 1.6 × 16 = 51 °C.</p>
+    </div>
+  </article>
+
+  <article class="entry" data-k="diode forward drop 1n4001 reverse polarity dissipation vf">
+    <div>
+      <h3>Diode drop &amp; dissipation</h3>
+      <div class="eq"><div>V<sub>after</sub> = V<sub>before</sub> − V<sub>F</sub></div><div>P = V<sub>F</sub> · I<sub>F</sub></div></div>
+      <dl class="syms">
+        <dt>V<sub>F</sub></dt><dd>forward voltage. It is not a constant: it rises with current and falls as the diode warms (V)</dd>
+        <dt>I<sub>F</sub></dt><dd>forward current (A)</dd>
+      </dl>
+      <p class="ds"><span class="lbl">Datasheet (1N4001)</span><span class="tag">V<sub>F</sub> ≤ 1.1 V @ 1 A</span><span class="tag">I<sub>F(AV)</sub> 1 A</span><span class="tag">V<sub>RRM</sub> 50 V</span></p>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked · reverse-polarity diode at 200 mA</div>
+<pre>V<sub>F</sub> ≈ 0.8 V at 200 mA (read off the V<sub>F</sub>–I<sub>F</sub> curve)
+P = 0.8 × 0.2 = <b>0.16 W</b>   (fine for a 1 A part)</pre>
+      <p class="note">A Schottky (e.g. 1N5817, V<sub>F</sub> ≈ 0.3–0.45 V) gives the regulator about 0.4 V more headroom and runs cooler.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============ C & L ============ -->
+<section class="grp" id="reactive">
+  <div class="grp-head"><h2>Capacitors &amp; inductors</h2><span>time constants · reactance · energy</span></div>
+
+  <article class="entry" data-k="rc time constant tau charge exponential 63 percent">
+    <div>
+      <h3>RC charging: time constant τ</h3>
+      <div class="eq"><div>τ = R · C</div><div>V<sub>C</sub>(t) = V<sub>final</sub> · (1 − e<sup>−t/τ</sup>)</div></div>
+      <dl class="syms">
+        <dt>τ</dt><dd>time constant, seconds (Ω·F = s)</dd>
+        <dt>t</dt><dd>time since the step (s)</dd>
+        <dt>V<sub>C</sub></dt><dd>capacitor voltage at time t (V)</dd>
+        <dt>e</dt><dd>2.718…; e<sup>−1</sup> = 0.368, so after 1 τ, 36.8 % of the gap is left</dd>
+      </dl>
+      <div class="work" style="margin-top:4px">
+        <div class="lbl">Worked · 10 kΩ, 100 µF</div>
+<pre>τ = 10 kΩ × 100 µF = 1000 ms = <b>1 s</b>
+“fully” charged (5 τ, 99.3 %) ≈ <b>5 s</b></pre>
+      </div>
+    </div>
+    <figure class="rc">
+      <svg viewBox="0 0 520 240" role="img" aria-label="Capacitor voltage versus time in time constants: 63.2 percent at 1 tau, 86.5 at 2, 95.0 at 3, 98.2 at 4, 99.3 at 5.">
+        <g class="gl">
+          <line x1="44" y1="14" x2="504" y2="14"/><line x1="44" y1="62" x2="504" y2="62"/><line x1="44" y1="110" x2="504" y2="110"/><line x1="44" y1="158" x2="504" y2="158"/>
+          <line x1="136" y1="14" x2="136" y2="206"/><line x1="228" y1="14" x2="228" y2="206"/><line x1="320" y1="14" x2="320" y2="206"/><line x1="412" y1="14" x2="412" y2="206"/><line x1="504" y1="14" x2="504" y2="206"/>
+        </g>
+        <line class="ax" x1="44" y1="206" x2="504" y2="206"/><line class="ax" x1="44" y1="14" x2="44" y2="206"/>
+        <g class="txt" text-anchor="end">
+          <text x="38" y="210">0%</text><text x="38" y="162">25%</text><text x="38" y="114">50%</text><text x="38" y="66">75%</text><text x="38" y="18">100%</text>
+        </g>
+        <g class="txt" text-anchor="middle">
+          <text x="44" y="224">0</text><text x="136" y="224">1τ</text><text x="228" y="224">2τ</text><text x="320" y="224">3τ</text><text x="412" y="224">4τ</text><text x="498" y="224">5τ</text>
+        </g>
+        <path class="curve" d="M44.0,206.0 L48.6,196.6 L53.2,187.7 L57.8,179.3 L62.4,171.2 L67.0,163.5 L71.6,156.2 L76.2,149.3 L80.8,142.7 L85.4,136.4 L90.0,130.5 L94.6,124.8 L99.2,119.4 L103.8,114.2 L108.4,109.3 L113.0,104.7 L117.6,100.3 L122.2,96.1 L126.8,92.1 L131.4,88.3 L136.0,84.6 L140.6,81.2 L145.2,77.9 L149.8,74.8 L154.4,71.8 L159.0,69.0 L163.6,66.3 L168.2,63.8 L172.8,61.3 L177.4,59.0 L182.0,56.8 L186.6,54.8 L191.2,52.8 L195.8,50.9 L200.4,49.1 L205.0,47.4 L209.6,45.7 L214.2,44.2 L218.8,42.7 L223.4,41.3 L228.0,40.0 L232.6,38.7 L237.2,37.5 L241.8,36.4 L246.4,35.3 L251.0,34.2 L255.6,33.2 L260.2,32.3 L264.8,31.4 L269.4,30.6 L274.0,29.8 L278.6,29.0 L283.2,28.3 L287.8,27.6 L292.4,26.9 L297.0,26.3 L301.6,25.7 L306.2,25.1 L310.8,24.6 L315.4,24.0 L320.0,23.6 L324.6,23.1 L329.2,22.6 L333.8,22.2 L338.4,21.8 L343.0,21.4 L347.6,21.1 L352.2,20.7 L356.8,20.4 L361.4,20.1 L366.0,19.8 L370.6,19.5 L375.2,19.2 L379.8,19.0 L384.4,18.7 L389.0,18.5 L393.6,18.3 L398.2,18.1 L402.8,17.9 L407.4,17.7 L412.0,17.5 L416.6,17.3 L421.2,17.2 L425.8,17.0 L430.4,16.9 L435.0,16.7 L439.6,16.6 L444.2,16.5 L448.8,16.4 L453.4,16.2 L458.0,16.1 L462.6,16.0 L467.2,15.9 L471.8,15.8 L476.4,15.7 L481.0,15.7 L485.6,15.6 L490.2,15.5 L494.8,15.4 L499.4,15.4 L504.0,15.3"/>
+        <circle class="dot" cx="136" cy="84.6" r="4"/><circle class="dot" cx="228" cy="40" r="4"/><circle class="dot" cx="320" cy="23.6" r="4"/><circle class="dot" cx="412" cy="17.5" r="4"/><circle class="dot" cx="504" cy="15.3" r="4"/>
+        <g class="txt-i">
+          <text x="144" y="100">63.2%</text><text x="236" y="56">86.5%</text><text x="320" y="44" text-anchor="middle">95.0%</text><text x="412" y="38" text-anchor="middle">98.2%</text><text x="500" y="36" text-anchor="end">99.3%</text>
+        </g>
+      </svg>
+      <figcaption>Charge toward a step, in units of τ. Discharge is the mirror image: 36.8 % remains after 1 τ, 0.7 % after 5 τ.</figcaption>
+    </figure>
+  </article>
+
+  <article class="entry" data-k="reactance capacitive inductive xc xl cutoff filter low pass decoupling -3db x7r esr">
+    <div>
+      <h3>Reactance &amp; RC cutoff</h3>
+      <div class="eq"><div>X<sub>C</sub> = 1 / (2π · f · C)</div><div>X<sub>L</sub> = 2π · f · L</div><div>f<sub>c</sub> = 1 / (2π · R · C)</div></div>
+      <dl class="syms">
+        <dt>X<sub>C</sub>, X<sub>L</sub></dt><dd>reactance: AC “resistance” of a cap / inductor at frequency f (Ω)</dd>
+        <dt>f</dt><dd>frequency, hertz (Hz = 1/s)</dd>
+        <dt>f<sub>c</sub></dt><dd>RC filter corner, where output is −3 dB (70.7 %) and X<sub>C</sub> = R</dd>
+        <dt>2π</dt><dd>≈ 6.283, converts cycles to radians</dd>
+      </dl>
+      <p class="ds"><span class="lbl">Datasheet (caps)</span><span class="tag">ESR @ 100 kHz</span><span class="tag">Rated voltage</span><span class="tag">Dielectric (C0G / X7R / Y5V)</span><span class="tag">DC-bias curve</span><span class="tag">Ripple current</span></p>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked</div>
+<pre>100 µF @ 100 Hz:  1/(6.283×100×100e-6) = <b>15.9 Ω</b>
+100 nF @ 1 MHz:   1/(6.283×1e6×100e-9)  = <b>1.59 Ω</b>
+100 µH @ 50 kHz:  6.283×50e3×100e-6    = <b>31.4 Ω</b>
+
+low-pass, 10 kΩ + 10 nF:
+f<sub>c</sub> = 1/(6.283×10e3×10e-9)          = <b>1.59 kHz</b></pre>
+      <p class="warn">A ceramic cap’s real capacitance is less than its label. An X7R 10 µF / 10 V part can lose half or more of its capacitance at 5 V DC. Check the DC-bias curve and use C0G/NP0 where the exact value matters (timing, filters).</p>
+    </div>
+  </article>
+
+  <article class="entry" data-k="charge q=cv capacitor ripple droop hold up energy">
+    <div>
+      <h3>Capacitor charge, droop &amp; energy</h3>
+      <div class="eq"><div>Q = C · V</div><div>ΔV = I · Δt / C</div><div>E = ½ · C · V²</div></div>
+      <dl class="syms">
+        <dt>Q</dt><dd>charge, coulombs (C = A·s)</dd>
+        <dt>C</dt><dd>capacitance, farads (F = C/V)</dd>
+        <dt>ΔV</dt><dd>voltage drop when current I is drawn for time Δt with no recharge (V)</dd>
+        <dt>E</dt><dd>stored energy, joules (J = W·s)</dd>
+      </dl>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked · 220 µF on a 5 V rail</div>
+<pre>5 mA drawn for 10 ms, supply gone:
+ΔV = 0.005 × 0.010 / 220e-6  = <b>0.23 V</b>
+
+E = ½ × 220e-6 × 5²         = <b>2.75 mJ</b></pre>
+      <p class="note">Rearranged, this is how you size hold-up caps: C = I·Δt / ΔV<sub>allowed</sub>.</p>
+    </div>
+  </article>
+
+  <article class="entry" data-k="inductor v=l di/dt ramp l/r time constant dcr energy saturation">
+    <div>
+      <h3>Inductor current ramp</h3>
+      <div class="eq"><div>V = L · ΔI / Δt  →  ΔI = V · Δt / L</div><div>τ = L / R</div><div>E = ½ · L · I²</div></div>
+      <dl class="syms">
+        <dt>L</dt><dd>inductance, henries (H = V·s/A)</dd>
+        <dt>V</dt><dd>voltage across the inductor. A constant V gives a straight-line current ramp</dd>
+        <dt>R</dt><dd>series resistance: the winding’s DCR plus anything else in the loop (Ω)</dd>
+      </dl>
+      <p class="ds"><span class="lbl">Datasheet (inductor)</span><span class="tag">I<sub>sat</sub> (L drops by 20–30 %)</span><span class="tag">I<sub>rms</sub> (heat rating)</span><span class="tag">DCR</span></p>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked · 100 µH with 4 V across it</div>
+<pre>slope = V / L = 4 / 100e-6   = 40 000 A/s
+                             = 0.04 A per µs
+for 11.1 µs: ΔI = 0.04 × 11.1 = <b>0.44 A</b>
+
+τ with 0.1 Ω DCR = 100 µH / 0.1 Ω = 1 ms
+E @ 0.72 A = ½ × 100e-6 × 0.72² = 26 µJ</pre>
+      <p class="note">These are the buck converter’s numbers: 4 V = 9 − 5 across the inductor during the on-time.</p>
+    </div>
+  </article>
+
+  <article class="entry" data-k="lc resonance resonant frequency f0 tank filter">
+    <div>
+      <h3>LC resonance</h3>
+      <div class="eq"><div>f<sub>0</sub> = 1 / (2π · √(L · C))</div></div>
+      <dl class="syms">
+        <dt>f<sub>0</sub></dt><dd>frequency where X<sub>L</sub> = X<sub>C</sub> (Hz)</dd>
+      </dl>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked · buck output filter 100 µH + 220 µF</div>
+<pre>√(100e-6 × 220e-6) = 148.3e-6
+f<sub>0</sub> = 1 / (6.283 × 148.3e-6) = <b>1.07 kHz</b></pre>
+      <p class="note">The filter passes DC and blocks the switching frequency, so f<sub>0</sub> should sit well below f<sub>sw</sub>. At 50 kHz, that’s about 47× higher, which is fine.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============ BUCK ============ -->
+<section class="grp" id="buck">
+  <div class="grp-head"><h2>Buck converter</h2><span>ideal, continuous conduction</span></div>
+
+  <article class="entry" data-k="buck converter duty cycle ripple inductor output capacitor esr isat hysteretic switching frequency">
+    <div>
+      <h3>Duty cycle, inductor ripple, output ripple</h3>
+      <div class="eq">
+        <div>D = V<sub>out</sub> / V<sub>in</sub></div>
+        <div>ΔI<sub>L</sub> = (V<sub>in</sub> − V<sub>out</sub>) · D / (L · f<sub>sw</sub>)</div>
+        <div>ΔV<sub>C</sub> ≈ ΔI<sub>L</sub> / (8 · f<sub>sw</sub> · C<sub>out</sub>)</div>
+        <div>ΔV<sub>ESR</sub> ≈ ΔI<sub>L</sub> · ESR</div>
+        <div>I<sub>peak</sub> = I<sub>out</sub> + ΔI<sub>L</sub> / 2</div>
+      </div>
+      <dl class="syms">
+        <dt>D</dt><dd>duty cycle: fraction of each period the switch is on (0–1)</dd>
+        <dt>f<sub>sw</sub></dt><dd>switching frequency (Hz); period T = 1/f<sub>sw</sub>, on-time = D·T</dd>
+        <dt>ΔI<sub>L</sub></dt><dd>peak-to-peak inductor ripple current (A)</dd>
+        <dt>ΔV<sub>C</sub></dt><dd>output ripple from charging and discharging the capacitance (V p-p)</dd>
+        <dt>ESR</dt><dd>output cap’s equivalent series resistance (Ω)</dd>
+      </dl>
+      <p class="ds"><span class="lbl">Datasheet</span><span class="tag">Inductor I<sub>sat</sub></span><span class="tag">Cap ESR</span><span class="tag">Cap ripple current</span><span class="tag">Diode I<sub>F(AV)</sub>, t<sub>rr</sub></span></p>
+      <p class="note">Your design is hysteretic, so f<sub>sw</sub> isn’t fixed. The switch toggles whenever the output crosses the comparator’s hysteresis band, so frequency depends on the band width, the ripple and the load. These equations still give you the size of things at whatever frequency it settles to.</p>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked · 9 V → 5 V, 500 mA, 100 µH, 220 µF, assume 50 kHz</div>
+<pre>D     = 5 / 9                         = 0.556
+T     = 1 / 50 kHz                    = 20 µs
+t<sub>on</sub>  = 0.556 × 20 µs                 = 11.1 µs
+ΔI<sub>L</sub>  = (9−5) × 0.556 / (100e-6 × 50e3)
+      = 2.222 / 5                     = <b>0.44 A p-p</b>
+I<sub>peak</sub> = 0.5 + 0.44/2                  = <b>0.72 A</b>
+
+ΔV<sub>C</sub>  = 0.444 / (8 × 50e3 × 220e-6)
+      = 0.444 / 88                    = <b>5 mV</b>
+ΔV<sub>ESR</sub> (ESR 0.1 Ω) = 0.444 × 0.1    = <b>44 mV</b></pre>
+      <p class="warn">With a general-purpose electrolytic, ESR causes most of the output ripple (44 mV vs 5 mV here). Pick a low-ESR cap, or add a ceramic in parallel. Also check that the inductor’s I<sub>sat</sub> is above 0.72 A with margin.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============ COMPARATORS / REFS ============ -->
+<section class="grp" id="refs">
+  <div class="grp-head"><h2>Comparators &amp; references</h2><span>LM393 hysteresis · TL431</span></div>
+
+  <article class="entry" data-k="comparator lm393 hysteresis schmitt threshold open collector pull-up vol">
+    <div>
+      <h3>Comparator hysteresis (non-inverting)</h3>
+      <div class="eq">
+        <div>V<sub>rise</sub> = V<sub>ref</sub> · (1 + R1/R2)</div>
+        <div>ΔV<sub>hyst</sub> = V<sub>CC</sub> · R1/R2</div>
+        <div>V<sub>fall</sub> = V<sub>rise</sub> − ΔV<sub>hyst</sub></div>
+      </div>
+      <dl class="syms">
+        <dt>R1</dt><dd>from the signal to the (+) input (Ω)</dd>
+        <dt>R2</dt><dd>feedback, from the output back to (+) (Ω)</dd>
+        <dt>V<sub>ref</sub></dt><dd>fixed voltage on the (−) input (V)</dd>
+        <dt>V<sub>rise</sub></dt><dd>input level that flips the output high (V)</dd>
+        <dt>V<sub>fall</sub></dt><dd>input level that flips it back low (V)</dd>
+      </dl>
+      <p class="note">Assumes output low ≈ 0 V and output high ≈ V<sub>CC</sub>. The LM393 is open-collector, so “high” comes from the pull-up resistor.</p>
+      <p class="ds"><span class="lbl">Datasheet (LM393)</span><span class="tag">V<sub>OL</sub> ≤ 0.4 V @ I<sub>OL</sub> 4 mA</span><span class="tag">V<sub>IO</sub> offset</span><span class="tag">Response time</span><span class="tag">Common-mode range</span></p>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked · V<sub>CC</sub> 5 V, V<sub>ref</sub> 2.5 V, R1 10 k, R2 100 k</div>
+<pre>R1/R2 = 10k / 100k            = 0.1
+V<sub>rise</sub>  = 2.5 × 1.1           = <b>2.75 V</b>
+ΔV     = 5 × 0.1              = 0.50 V
+V<sub>fall</sub>  = 2.75 − 0.50         = <b>2.25 V</b></pre>
+      <p class="warn">When the output is high, the pull-up resistor is in series with R2 (100 k + R<sub>pu</sub>), which narrows the band slightly. Keep R<sub>pu</sub> ≪ R2, e.g. 1–4.7 k against 100 k.</p>
+    </div>
+  </article>
+
+  <article class="entry" data-k="tl431 shunt reference vref iref cathode current bias resistor adjustable">
+    <div>
+      <h3>TL431 adjustable shunt reference</h3>
+      <div class="eq">
+        <div>V<sub>KA</sub> = V<sub>ref</sub> · (1 + R1/R2) + I<sub>ref</sub> · R1</div>
+        <div>R<sub>bias</sub> = (V<sub>supply</sub> − V<sub>KA</sub>) / (I<sub>KA</sub> + I<sub>load</sub>)</div>
+      </div>
+      <dl class="syms">
+        <dt>V<sub>KA</sub></dt><dd>cathode-to-anode voltage = the regulated output (V)</dd>
+        <dt>R1</dt><dd>cathode → REF pin (Ω)</dd>
+        <dt>R2</dt><dd>REF pin → anode/ground (Ω)</dd>
+        <dt>V<sub>ref</sub></dt><dd>internal reference, 2.495 V typ</dd>
+        <dt>I<sub>ref</sub></dt><dd>current flowing into the REF pin (A)</dd>
+        <dt>I<sub>KA</sub></dt><dd>current through the TL431 itself; must stay above I<sub>min</sub></dd>
+      </dl>
+      <p class="ds"><span class="lbl">Datasheet (TI TL431)</span><span class="tag">V<sub>ref</sub> 2.495 V typ</span><span class="tag">I<sub>ref</sub> 2 µA typ / 4 µA max</span><span class="tag">I<sub>min</sub> 1 mA max</span><span class="tag">I<sub>KA</sub> ≤ 100 mA</span></p>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked</div>
+<pre>2.5 V (REF tied to K), from 5 V, want ~1.5 mA:
+R<sub>bias</sub> = (5 − 2.495) / 1.5 mA = 1.67 k → <b>1.5 kΩ</b>
+         (gives 1.67 mA ≥ 1 mA ✓)
+
+3.3 V: R1 = 3.3 k, R2 = 10 k
+V = 2.495 × 1.33 + 2e-6 × 3.3k
+  = 3.318 + 0.007           = <b>3.33 V</b>
+
+5 V:   R1 = R2 = 10 k
+V = 2.495 × 2 + 2e-6 × 10k
+  = 4.990 + 0.020           = <b>5.01 V</b></pre>
+      <p class="warn">The I<sub>ref</sub>·R1 term grows with R1. With 100 k resistors it adds 0.2–0.4 V (2–4 µA × 100 k), so keep R1 in the low tens of kΩ.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============ SWITCHES ============ -->
+<section class="grp" id="switches">
+  <div class="grp-head"><h2>Transistor switches</h2><span>BJT drive · MOSFET losses</span></div>
+
+  <article class="entry" data-k="bjt npn 2n2222 saturation base resistor hfe forced beta vce sat">
+    <div>
+      <h3>BJT as a saturated switch</h3>
+      <div class="eq">
+        <div>I<sub>B</sub> ≥ I<sub>C</sub> / β<sub>forced</sub>   (β<sub>forced</sub> ≈ 10)</div>
+        <div>R<sub>B</sub> = (V<sub>drive</sub> − V<sub>BE</sub>) / I<sub>B</sub></div>
+      </div>
+      <dl class="syms">
+        <dt>I<sub>C</sub></dt><dd>collector current the load needs (A)</dd>
+        <dt>I<sub>B</sub></dt><dd>base current you supply (A)</dd>
+        <dt>β<sub>forced</sub></dt><dd>deliberately low I<sub>C</sub>/I<sub>B</sub> ratio that drives the transistor fully into saturation. Don’t use the h<sub>FE</sub> figure here: that’s its gain in the linear region</dd>
+        <dt>V<sub>BE</sub></dt><dd>base-emitter drop, ≈ 0.7 V (up to ~1 V when saturated hard)</dd>
+      </dl>
+      <p class="ds"><span class="lbl">Datasheet (2N2222A)</span><span class="tag">V<sub>CE(sat)</sub> ≤ 0.3 V @ 150/15 mA</span><span class="tag">V<sub>BE(sat)</sub> 0.6–1.2 V</span><span class="tag">h<sub>FE</sub> 100–300 @ 150 mA</span><span class="tag">I<sub>C</sub> max</span></p>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked · your 2N2222 pulling the IRF9540 gate low</div>
+<pre>gate pull-up 1 kΩ to 9 V:
+I<sub>C</sub> = 9 V / 1 kΩ               = 9 mA
+I<sub>B</sub> = 9 mA / 10                = 0.9 mA
+R<sub>B</sub> = (5 − 0.7) / 0.9 mA       = 4.78 k → <b>4.7 kΩ</b></pre>
+      <p class="warn">If the base is driven from the LM393’s pull-up rather than a push-pull output, that pull-up resistor is in series with R<sub>B</sub>. Add it into the sum.</p>
+    </div>
+  </article>
+
+  <article class="entry" data-k="mosfet conduction loss rds on vgs threshold logic level irf9540 irfz44n rfp30n06le 2n7000">
+    <div>
+      <h3>MOSFET conduction loss</h3>
+      <div class="eq"><div>P<sub>cond</sub> = I<sub>D</sub>² · R<sub>DS(on)</sub> · D</div></div>
+      <dl class="syms">
+        <dt>I<sub>D</sub></dt><dd>drain current while on (A)</dd>
+        <dt>R<sub>DS(on)</sub></dt><dd>on-resistance, valid only at the V<sub>GS</sub> it’s listed at (Ω)</dd>
+        <dt>D</dt><dd>fraction of time on (1 for a static switch)</dd>
+      </dl>
+      <div class="tscroll"><table class="t">
+        <thead><tr><th>Part</th><th>Type</th><th>R<sub>DS(on)</sub> max</th><th>@ V<sub>GS</sub></th></tr></thead>
+        <tbody>
+          <tr><td class="m">IRF9540</td><td>P</td><td class="m">0.20 Ω</td><td class="m">−10 V</td></tr>
+          <tr><td class="m">IRF9540N</td><td>P</td><td class="m">0.117 Ω</td><td class="m">−10 V</td></tr>
+          <tr><td class="m">IRFZ44N</td><td>N</td><td class="m">17.5 mΩ</td><td class="m">10 V</td></tr>
+          <tr><td class="m">RFP30N06LE</td><td>N, logic</td><td class="m">47 mΩ</td><td class="m">5 V</td></tr>
+          <tr><td class="m">2N7000</td><td>N, small</td><td class="m">≈5 Ω</td><td class="m">10 V</td></tr>
+        </tbody>
+      </table></div>
+      <p class="ds" style="margin-top:10px"><span class="lbl">Datasheet</span><span class="tag">R<sub>DS(on)</sub> @ V<sub>GS</sub>, I<sub>D</sub></span><span class="tag">V<sub>GS(th)</sub> @ 250 µA</span><span class="tag">V<sub>GS</sub> max ±20 V</span></p>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked · IRF9540 in the buck, 0.5 A, D = 0.556</div>
+<pre>P = 0.5² × 0.20 × 0.556 = <b>28 mW</b>
+
+gate swing at 9 V in:  V<sub>GS</sub> ≈ −8.8 V  (≤ 20 ✓)
+gate swing at 12 V in: V<sub>GS</sub> ≈ −11.8 V (≤ 20 ✓)</pre>
+      <p class="warn">V<sub>GS(th)</sub> (−2 to −4 V for the IRF9540) is where the FET only just starts to conduct, at 250 µA. It isn’t the voltage for fully on. Use the V<sub>GS</sub> listed beside R<sub>DS(on)</sub>. That’s why a 3.3 V GPIO can’t drive an IRFZ44N properly but can mostly drive an RFP30N06LE.</p>
+    </div>
+  </article>
+
+  <article class="entry" data-k="mosfet switching loss gate charge qg qgd miller plateau edge time">
+    <div>
+      <h3>MOSFET switching loss (rough)</h3>
+      <div class="eq">
+        <div>t<sub>sw</sub> ≈ Q<sub>gd</sub> / I<sub>g</sub></div>
+        <div>I<sub>g</sub> ≈ V<sub>plateau</sub> / R<sub>g</sub></div>
+        <div>P<sub>sw</sub> ≈ ½ · V<sub>in</sub> · I<sub>D</sub> · t<sub>sw</sub> · f<sub>sw</sub>   (per edge)</div>
+      </div>
+      <dl class="syms">
+        <dt>Q<sub>gd</sub></dt><dd>gate-drain (Miller) charge: the charge that must move while drain voltage swings (C)</dd>
+        <dt>V<sub>plateau</sub></dt><dd>|V<sub>GS</sub>| where the gate voltage flattens during the swing, ~4–5 V for these parts</dd>
+        <dt>R<sub>g</sub></dt><dd>whatever resistance charges or discharges the gate (Ω)</dd>
+        <dt>t<sub>sw</sub></dt><dd>time spent with both voltage and current on the FET (s)</dd>
+      </dl>
+      <p class="ds"><span class="lbl">Datasheet (IRF9540)</span><span class="tag">Q<sub>g</sub> 61 nC</span><span class="tag">Q<sub>gs</sub> 14 nC</span><span class="tag">Q<sub>gd</sub> 29 nC</span><span class="tag">Gate-charge curve</span></p>
+    </div>
+    <div class="work">
+      <div class="lbl">Worked · turn-off through the 1 kΩ pull-up</div>
+<pre>I<sub>g</sub>    ≈ 4.5 V / 1 kΩ            = 4.5 mA
+t<sub>off</sub>  ≈ 29 nC / 4.5 mA          = <b>6.4 µs</b>
+period @ 50 kHz                  = 20 µs
+
+P<sub>sw</sub> ≈ ½ × 9 × 0.5 × 6.4e-6 × 50e3
+     = <b>0.72 W</b>   (vs 28 mW conduction)</pre>
+      <p class="warn">Turn-on is fast because the NPN sinks hard. Turn-off is slow because the 1 k pull-up does all the work, so the switching loss dwarfs the conduction loss and the FET will get warm. A 220 Ω pull-up gives about 20 mA and about 1.4 µs, but then the NPN sinks about 41 mA and needs about 4 mA of base current.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============ SIGNALS ============ -->
+<section class="grp" id="signals">
+  <div class="grp-head"><h2>Signals</h2><span>decibels</span></div>
+
+  <article class="entry" data-k="decibel db gain ratio -3db voltage power log">
+    <div>
+      <h3>Decibels</h3>
+      <div class="eq"><div>dB = 20 · log₁₀(V₂ / V₁)</div><div>dB = 10 · log₁₀(P₂ / P₁)</div></div>
+      <dl class="syms">
+        <dt>20 vs 10</dt><dd>power goes as V², and log(V²) = 2·log(V), so voltage ratios get 20×</dd>
+        <dt>dBV / dBu</dt><dd>absolute levels referenced to 1 V / 0.775 V</dd>
+      </dl>
+      <p class="ds"><span class="lbl">Datasheet</span><span class="tag">PSRR</span><span class="tag">CMRR</span><span class="tag">Open-loop gain A<sub>VOL</sub></span><span class="tag">Ripple rejection (L7805)</span></p>
+    </div>
+    <div class="work">
+      <div class="lbl">Quick table</div>
+      <div class="tscroll"><table class="t">
+        <thead><tr><th>dB</th><th>Voltage ×</th><th>Power ×</th></tr></thead>
+        <tbody>
+          <tr><td class="m">−3</td><td class="m">0.707</td><td class="m">0.5</td></tr>
+          <tr><td class="m">+3</td><td class="m">1.41</td><td class="m">2</td></tr>
+          <tr><td class="m">+6</td><td class="m">2</td><td class="m">4</td></tr>
+          <tr><td class="m">+20</td><td class="m">10</td><td class="m">100</td></tr>
+          <tr><td class="m">+40</td><td class="m">100</td><td class="m">10 000</td></tr>
+          <tr><td class="m">+60</td><td class="m">1000</td><td class="m">10⁶</td></tr>
+        </tbody>
+      </table></div>
+<pre style="margin-top:10px">60 dB ripple rejection, 1 V ripple in:
+1 V / 1000 = <b>1 mV</b> ripple out</pre>
+    </div>
+  </article>
+</section>
+
+<footer>
+  Formulas assume ideal parts unless noted. Datasheet figures are quoted from the common manufacturer sheets (ST L7805, TI LM393 / TL431, onsemi 1N4001 / 2N2222A, Vishay IRF9540) as a guide, not a substitute for the sheet for your exact part and grade.
+</footer>
+</div>
+
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var entries=[].slice.call(document.querySelectorAll('.entry'));
+  var groups=[].slice.call(document.querySelectorAll('section.grp'));
+  var none=document.getElementById('nomatch');
+  function norm(s){return s.toLowerCase().replace(/µ/g,'u').replace(/\s+/g,' ');}
+  var hay=entries.map(function(e){return norm((e.getAttribute('data-k')||'')+' '+e.textContent);});
+  function run(){
+    var terms=norm(q.value).trim().split(' ').filter(Boolean);
+    var any=false;
+    entries.forEach(function(e,i){
+      var ok=terms.every(function(t){return hay[i].indexOf(t)!==-1;});
+      e.hidden=!ok; if(ok) any=true;
+    });
+    groups.forEach(function(g){g.hidden=!g.querySelector('.entry:not([hidden])');});
+    none.hidden=any;
+  }
+  q.addEventListener('input',run);
+  document.addEventListener('keydown',function(ev){
+    if(ev.key==='/'&&document.activeElement!==q){ev.preventDefault();q.focus();}
+    else if(ev.key==='Escape'&&document.activeElement===q){q.value='';run();q.blur();}
+  });
+})();
+</script>
+
+</body></html>

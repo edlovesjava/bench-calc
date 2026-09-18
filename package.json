@@ -1,0 +1,11 @@
+{
+  "name": "bench-calc",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Offline-first bench calculators for electronics. No build step, no dependencies.",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\"",
+    "dev": "node tools/serve.js"
+  }
+}
