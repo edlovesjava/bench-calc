@@ -396,7 +396,7 @@ export function identifiers(ast) {
 }
 
 export function substitute(ast, scope = {}, fmt = String) {
-  const format = (value) => (typeof fmt === 'function' ? fmt(value) : String(value));
+  const format = (value, name) => (typeof fmt === 'function' ? fmt(value, name) : String(value));
 
   function walk(node) {
     if (!node) return '';
@@ -406,8 +406,8 @@ export function substitute(ast, scope = {}, fmt = String) {
         return format(node.value);
 
       case 'identifier': {
-        if (Object.hasOwn(scope, node.name)) return format(scope[node.name]);
-        if (node.name === 'pi') return format(Math.PI);
+        if (Object.hasOwn(scope, node.name)) return format(scope[node.name], node.name);
+        if (node.name === 'pi') return format(Math.PI, node.name);
         return node.name;
       }
 

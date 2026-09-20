@@ -105,15 +105,30 @@ npm test         # node --test, no install
 npm run dev      # http://localhost:8080 (ES modules need an http origin)
 ```
 
-## Two things not yet decided
+## Decided: the `procedure` escape hatch
 
-Flagged here so nobody quietly invents an answer:
+E-series nearest value and the capacitor code decoder are algorithms, not
+equations. A definition opts out of the relation/solve-for machinery with
+`kind: 'procedure'`:
 
-- **Procedures that are not a single relation.** E-series nearest value and the
-  capacitor code decoder are algorithms, not equations. The definition format
-  needs an escape hatch for them (a `procedure` kind with a plain function, kept
-  out of the solve-for machinery). Decide this at phase 3, not by improvisation
-  at phase 7.
+```js
+{
+  id: 'eseries',
+  kind: 'procedure',
+  vars: { t: { unit: 'ohm', ... }, series: { kind: 'mode', options: [...] } },
+  run(values) { /* plain function, returns { outputId: number, ... } */ },
+  outputs: [{ id: 'nearest', unit: 'ohm', label: '...' }, ...],
+  examples: [...],
+}
+```
+
+`runDefinition` in `src/engine/formula.js` dispatches on `kind`. A `mode` var
+(`kind: 'mode'`) is a fixed set of string options rather than a parsed
+numeric field — the UI renders it as a `<select>`. See `src/calc/eseries.js`
+for the reference implementation; `capcode` should follow the same shape.
+
+## One thing not yet decided
+
 - **Tolerance propagation.** Nothing currently tracks that Rthja is ±20 %. Out
   of scope for v1, but do not design the trace format in a way that makes it
   impossible to add later.

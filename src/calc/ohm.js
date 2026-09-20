@@ -7,7 +7,7 @@ export default {
   vars: {
     V: { unit: 'V', label: 'V (across R)', default: '5' },
     I: { unit: 'A', label: 'I (through R)', default: '50m' },
-    R: { unit: 'ohm', label: 'R', default: '100' },
+    R: { unit: 'ohm', label: 'R', default: '100', series: true },
     Prated: { unit: 'W', label: 'Part rating', default: '0.25' },
   },
 

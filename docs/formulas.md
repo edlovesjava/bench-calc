@@ -47,6 +47,11 @@ Series tables: E12 `10 12 15 18 22 27 33 39 47 56 68 82`; E24 `10 11 12 13 15 16
 
 Examples: `t=4780, E24` → nearest `4700`, error `-1.67 %`.
 
+Status: `src/calc/eseries.js` currently implements nearest-value + error + the
+tolerance band for E12/E24 only, as the first calculator through the
+`kind: procedure` escape hatch. E96 and the parallel-pair minimisation are not
+ported yet.
+
 Note: the tolerance band is wider than the gap to the next series value. A 5 %
 4.7 k can legitimately measure 4.47–4.94 k.
 
@@ -104,6 +109,7 @@ relation: `R = (Vs - Vf) / If`
 | `Vf` | V | LED Vf | `2.0` | red 1.8–2.2, green/blue/white 2.8–3.3 |
 | `If` | A | Forward current | `3m` | what you are actually designing |
 | `R` | ohm | Series resistor | `1k` | |
+| `dVfSpread` | V | Assumed Vf spread | `100m` | named so the sensitivity below is a real SI ratio, not a bare constant |
 
 closed forms: all four, trivially.
 
@@ -111,8 +117,8 @@ derived:
 - `head = Vs - Vf` (V)
 - `Pr = If^2 * R` (W)
 - `Pled = Vf * If` (W)
-- `sens = 0.1 / head` (dimensionless) — fractional current change per 100 mV of
-  Vf spread
+- `sens = dVfSpread / head` (dimensionless) — fractional current change per
+  the assumed Vf spread
 
 checks:
 - warn `If > 25m` — above the 20 mA most small LEDs are characterised at
@@ -155,7 +161,9 @@ is 250 mV (everything).
 
 ### `regulator` — Linear regulator heat
 
-relation: `P = (Vin - Vout) * Iout`
+relation: `P = (Vs - Vd - Vout) * Iout` — the top-level relation can only use
+base vars (never a derived quantity), so it is written directly in terms of
+`Vs`/`Vd`/`Vout` rather than through the derived `Vin`.
 
 | var | unit | label | default | note |
 |---|---|---|---|---|
@@ -168,18 +176,19 @@ relation: `P = (Vin - Vout) * Iout`
 | `Rjc` | degC/W | Rthjc | `5` | |
 | `Rsa` | degC/W | Rcs + Rsa, with sink | `11` | 1 mounting + 10 small sink |
 | `Vdrop` | V | Dropout | `2` | 2 for a 78xx, 0.3 for an LDO |
+| `Tjmax` | degC | Tj max | `125` | named so the checks below aren't a bare magic number |
 
 derived:
 - `Vin = Vs - Vd` (V), `head = Vin - Vout` (V)
 - `Tj = Ta + P * Rja` (degC)
 - `Rsink = Rjc + Rsa` (degC/W), `Tjsink = Ta + P * Rsink` (degC)
-- `Imax = (125 - Ta) / (Rja * head)` (A) — and the same with `Rsink`
+- `Imax = (Tjmax - Ta) / (Rja * head)` (A) — and the same with `Rsink`
 - `effReg = Vout / Vin`, `effBoard = Vout / Vs` (dimensionless)
 
 checks:
 - warn `head < Vdrop` — the output sags and follows the input, ripple and all
-- warn `Tj > 125` — thermal shutdown will cycle it
-- warn `Tj > 100` — within 25 °C of the limit; a warm day takes it over
+- warn `Tj > Tjmax` — thermal shutdown will cycle it
+- warn `Tj > Tjmax - 25` — within 25 °C of the limit; a warm day takes it over
 
 examples: `Vs=9, Vd=0.8, Vout=5, Iout=200m, Ta=25, Rja=50` →
 `Vin=8.2`, `head=3.2`, `P=0.64`, `Tj=57`.
@@ -198,9 +207,10 @@ relation: `Vafter = Vbefore - Vf`
 | `Vf` | V | Vf at this current | `0.8` |
 | `If` | A | Current | `200m` |
 | `Irated` | A | Part rating If(AV) | `1` |
+| `VfSchottky` | V | Vf a Schottky would drop | `0.35` |
 
 derived: `P = Vf * If` (W); `frac = If / Irated`;
-`saved = (Vf - 0.35) * If` (W) — what a Schottky would save
+`saved = (Vf - VfSchottky) * If` (W) — what a Schottky would save
 
 checks: warn `If > Irated`
 

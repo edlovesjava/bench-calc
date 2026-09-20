@@ -18,7 +18,8 @@ export default {
       ],
     },
     If: { unit: 'A', label: 'Forward current', default: '3m' },
-    R: { unit: 'ohm', label: 'Series resistor', default: '1k' },
+    R: { unit: 'ohm', label: 'Series resistor', default: '1k', series: true },
+    dVfSpread: { unit: 'V', label: 'Assumed Vf spread', default: '100m' },
   },
 
   relation: 'R = (Vs - Vf) / If',
@@ -38,11 +39,14 @@ export default {
     { id: 'head', unit: 'V', expr: 'Vs - Vf', label: 'Headroom' },
     { id: 'Pr', unit: 'W', expr: 'If^2 * R', label: 'Power in the resistor' },
     { id: 'Pled', unit: 'W', expr: 'Vf * If', label: 'Power in the LED' },
+    { id: 'sens', unit: '', expr: 'dVfSpread / head', label: 'Fractional current shift from the assumed Vf spread' },
   ],
 
   checks: [
+    { when: 'head <= 0', level: 'fail',
+      text: '{Vf} is at or above the rail ({Vs}); nothing lights.' },
     { when: 'If > 25m', level: 'warn', text: 'Well above the usual 20 mA design point.' },
-    { when: 'head < 0.5', level: 'warn', text: 'Only a little headroom; current will move around.' },
+    { when: 'head < 0.5', level: 'warn', text: 'Only {head} of headroom; current will move around.' },
   ],
 
   examples: [

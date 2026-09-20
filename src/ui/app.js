@@ -9,7 +9,9 @@
 import { calculators } from '../calc/index.js';
 import { runDefinition } from '../engine/formula.js';
 import { eng } from '../engine/format.js';
-import { nearestSeries, seriesValues } from '../engine/eseries.js';
+import { nearestSeries, seriesValues, seriesNames } from '../engine/eseries.js';
+
+const DEFAULT_SERIES = seriesNames.includes('E24') ? 'E24' : seriesNames[0];
 
 const app = document.getElementById('app');
 const state = {
@@ -40,10 +42,10 @@ function render() {
   );
 
   const result = runDefinition(calc, values, { solveFor: target });
-  const targetValue = result.values[target];
+  const targetValue = target ? result.values[target] : undefined;
   const adjustment = calc.adjustments?.find((item) => item.target === target)
-    ?? (calc.vars[target]?.unit === 'ohm'
-      ? { id: `standard-${target}`, target, label: 'Adjust to nearest', modes: ['E12', 'E24'] }
+    ?? (target && calc.vars[target]?.series
+      ? { id: `standard-${target}`, target, label: 'Adjust to nearest', modes: seriesNames }
       : null);
   const adjustmentState = state.adjustments[calc.id]?.[adjustment?.id] ?? {};
   const adjustmentMode = adjustmentState.mode ?? adjustment?.modes?.[1];
@@ -97,7 +99,23 @@ function render() {
             </label>
           ` : ''}
           <div class="field-grid">
-            ${Object.entries(calc.vars).map(([name, meta]) => `
+            ${Object.entries(calc.vars).map(([name, meta]) => {
+              const fieldError = result.fieldErrors?.find((e) => e.name === name);
+              if (meta.kind === 'mode') {
+                return `
+                  <label class="field input-field">
+                    <span class="field-label">
+                      <span>${meta.label}</span>
+                    </span>
+                    <div class="input-wrap">
+                      <select data-field="${name}" aria-label="${meta.label}">
+                        ${meta.options.map((opt) => `<option value="${opt}" ${String(values[name]) === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                      </select>
+                    </div>
+                  </label>
+                `;
+              }
+              return `
               <label class="field ${name === target ? 'computed' : 'input-field'}">
                 <span class="field-label">
                   <span>${meta.label}</span>
@@ -113,32 +131,35 @@ function render() {
                   >
                   <span class="unit">${meta.unit}</span>
                 </div>
+                ${fieldError ? `<span class="field-error">${fieldError.message}</span>` : ''}
                 ${name !== target && meta.presets?.length ? `
                   <select class="quick-entry" data-preset-field="${name}" aria-label="Quick ${meta.label} preset">
                     <option value="">Quick entry</option>
                     ${meta.presets.map((preset) => `<option value="${preset.value}" ${String(values[name]) === String(preset.value) ? 'selected' : ''}>${preset.label} (${preset.value} ${meta.unit})</option>`).join('')}
                   </select>
                 ` : ''}
-                ${name !== target && meta.unit === 'ohm' ? `
+                ${name !== target && meta.series ? `
                   <select class="quick-entry" data-series-mode="${name}" aria-label="Choose ${meta.label} series">
-                    <option value="E12" ${(state.seriesModes[calc.id]?.[name] ?? 'E24') === 'E12' ? 'selected' : ''}>E12 values</option>
-                    <option value="E24" ${(state.seriesModes[calc.id]?.[name] ?? 'E24') === 'E24' ? 'selected' : ''}>E24 values</option>
+                    ${seriesNames.map((mode) => `<option value="${mode}" ${(state.seriesModes[calc.id]?.[name] ?? DEFAULT_SERIES) === mode ? 'selected' : ''}>${mode} values</option>`).join('')}
                   </select>
                   <select class="quick-entry" data-series-value="${name}" aria-label="Choose ${meta.label} standard value">
                     <option value="">Choose standard value</option>
-                    ${seriesValues(state.seriesModes[calc.id]?.[name] ?? 'E24').map((value) => `<option value="${value}" ${String(values[name]) === String(value) ? 'selected' : ''}>${eng(value, meta.unit)}</option>`).join('')}
+                    ${seriesValues(state.seriesModes[calc.id]?.[name] ?? DEFAULT_SERIES).map((value) => `<option value="${value}" ${String(values[name]) === String(value) ? 'selected' : ''}>${eng(value, meta.unit)}</option>`).join('')}
                   </select>
                 ` : ''}
               </label>
-            `).join('')}
+              `;
+            }).join('')}
           </div>
         </section>
 
         <section class="panel result-panel">
-          <div class="headline">
-            <div class="headline-label">${target}</div>
-            <div class="headline-value">${Number.isFinite(targetValue) ? eng(targetValue, calc.vars[target]?.unit ?? '') : '—'}</div>
-          </div>
+          ${target ? `
+            <div class="headline">
+              <div class="headline-label">${target}</div>
+              <div class="headline-value">${result.valid && Number.isFinite(targetValue) ? eng(targetValue, calc.vars[target]?.unit ?? '') : '—'}</div>
+            </div>
+          ` : ''}
           ${adjustment ? `
             <div class="adjustment">
               <label class="adjustment-label" for="adjustment-${adjustment.id}">${adjustment.label}</label>
@@ -156,20 +177,22 @@ function render() {
           ` : ''}
 
           <div class="result-grid">
-            ${Object.entries(result.values).map(([name, value]) => `
-              <div class="result-row">
-                <span class="row-label">${name}</span>
-                <span class="row-value">${eng(value, calc.vars[name]?.unit ?? '')}</span>
-              </div>
-            `).join('')}
+            ${Object.entries(result.values)
+              .filter(([name]) => calc.vars[name]?.kind !== 'mode')
+              .map(([name, value]) => `
+                <div class="result-row">
+                  <span class="row-label">${name}</span>
+                  <span class="row-value">${eng(value, calc.vars[name]?.unit ?? '')}</span>
+                </div>
+              `).join('')}
           </div>
         </section>
 
         <section class="panel formula-panel">
           <h3>Formula</h3>
-          <div class="formula">${calc.relation}</div>
+          ${calc.relation ? `<div class="formula">${calc.relation}</div>` : ''}
           <div class="derived-list">
-            ${(calc.derived ?? []).map((item) => `
+            ${(calc.derived ?? calc.outputs ?? []).map((item) => `
               <div class="derived-item">
                 <span>${item.label}</span>
                 <strong>${Number.isFinite(result.derived[item.id]) ? eng(result.derived[item.id], item.unit) : '—'}</strong>
@@ -194,7 +217,8 @@ function render() {
   });
 
   app.querySelectorAll('[data-field]').forEach((input) => {
-    input.addEventListener('input', (event) => {
+    const eventName = input.tagName === 'SELECT' ? 'change' : 'input';
+    input.addEventListener(eventName, (event) => {
       const { field } = event.target.dataset;
       const current = state.values[calc.id] ?? {};
       current[field] = event.target.value;
