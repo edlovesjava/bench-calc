@@ -215,6 +215,7 @@ npm install --save-dev vite @vitejs/plugin-react typescript \
 {
   "compilerOptions": {
     "composite": true,
+    "noEmit": true,
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -224,6 +225,11 @@ npm install --save-dev vite @vitejs/plugin-react typescript \
   "include": ["vite.config.ts"]
 }
 ```
+
+(`noEmit: true` matters here: without it, `tsc -b` — invoked by the `build`
+npm script — emits `vite.config.js`/`vite.config.d.ts`/`.tsbuildinfo` into the
+repo root on every build. This file exists purely for `vite.config.ts` to be
+type-checked as part of the composite project graph, never to produce JS.)
 
 - [ ] **Step 5: Write `vite.config.ts`**
 
