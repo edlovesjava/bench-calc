@@ -7,9 +7,9 @@ export default {
   vars: {
     Vin: { unit: 'V', label: 'Vin', default: '5' },
     Vout: { unit: 'V', label: 'Vout', default: '' },
-    R1: { unit: 'ohm', label: 'R1 (top)', default: '10k' },
-    R2: { unit: 'ohm', label: 'R2 (bottom)', default: '10k' },
-    RL: { unit: 'ohm', label: 'Load resistance', default: '' },
+    R1: { unit: 'ohm', label: 'R1 (top)', default: '10k', series: true },
+    R2: { unit: 'ohm', label: 'R2 (bottom)', default: '10k', series: true },
+    RL: { unit: 'ohm', label: 'Load resistance', default: '', series: true },
   },
 
   relation: 'Vout = Vin * R2 / (R1 + R2)',

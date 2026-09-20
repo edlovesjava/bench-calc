@@ -13,6 +13,8 @@
   --accent-ink: #0B3B4A;
   --warn: #9A4A16;
   --warn-soft: #F7E8DB;
+  --fail: #A32626;
+  --fail-soft: #F8DEDE;
   --panel: #F4F8FA;
 
   --f-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
@@ -32,6 +34,8 @@
     --accent-ink: #BFE7F2;
     --warn: #F0A060;
     --warn-soft: #33251B;
+    --fail: #E58A8A;
+    --fail-soft: #331A1A;
     --panel: #111A1F;
   }
 }
@@ -392,6 +396,18 @@ code {
   background: var(--warn-soft);
   color: var(--ink);
   font-size: 13px;
+}
+
+.check.fail {
+  border-left-color: var(--fail);
+  background: var(--fail-soft);
+}
+
+.field-error {
+  display: block;
+  margin-top: 4px;
+  color: var(--fail);
+  font-size: 12px;
 }
 
 .result-grid {
