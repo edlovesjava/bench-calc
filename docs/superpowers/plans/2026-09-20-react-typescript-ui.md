@@ -606,7 +606,21 @@ Create `test-ui/setup.ts`:
 
 ```ts
 import '@testing-library/jest-dom/vitest';
+import { afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+
+afterEach(() => {
+  cleanup();
+});
 ```
+
+The `afterEach(cleanup)` matters from Task 4 onward: any test file that
+calls `render()` more than once (or has more than one test with its own
+`render()`) leaves prior DOM mounted without it, and later `screen.getBy*`
+queries fail with "Found multiple elements" — not a bug in the component
+under test, just accumulated DOM from earlier renders in the same file.
+`useCalculatorForm.test.tsx` (Task 3) never hit this because `renderHook`
+doesn't mount into the shared document the way `render()` does.
 
 - [ ] **Step 3: Run it, confirm it fails**
 
