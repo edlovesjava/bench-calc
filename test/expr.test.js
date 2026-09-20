@@ -51,6 +51,14 @@ test('substitute prints the worked arithmetic from the same AST', () => {
   assert.ok(text.includes('='));
 });
 
+test('substitute passes the identifier name to fmt for per-variable formatting', () => {
+  const ast = parse('R = (Vs - Vf) / If');
+  const text = substitute(ast, { Vs: 5, Vf: 2, If: 0.003 }, (n, name) => `${name ?? '?'}:${n}`);
+  assert.match(text, /Vs:5/);
+  assert.match(text, /Vf:2/);
+  assert.match(text, /If:0\.003/);
+});
+
 test('identifier extraction finds every variable used', () => {
   const set = identifiers(parse('R = (Vs - Vf) / If'));
   assert.deepEqual([...set].sort(), ['If', 'R', 'Vf', 'Vs']);
