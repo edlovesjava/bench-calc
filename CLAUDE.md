@@ -46,11 +46,21 @@ These are not preferences. Breaking one is a bug, not a style difference.
    this architecture exists to prevent. If you find yourself typing the same
    arithmetic twice, stop.
 
-3. **Zero runtime dependencies. No build step.** Plain ES modules in the
-   browser, plain ES modules under `node --test`. No bundler, no transpiler, no
-   framework, no CDN script tags. `package.json` has no `dependencies` and no
-   `devDependencies`, and it stays that way. If a task seems to need one, say so
-   and stop rather than adding it.
+3. **The engine and the calculator definitions stay dependency-free.**
+   `src/engine/**` and `src/calc/**` are plain ES modules, zero dependencies,
+   tested by `node --test` with no install step — that has not changed.
+
+   The UI layer (`src/ui-react/**`) is React + TypeScript, built with Vite.
+   `package.json` has `react`/`react-dom` as runtime dependencies and
+   `vite`/`typescript`/`vitest`/testing tooling as devDependencies, and that is
+   accepted, not a violation to route around. What is still not allowed: a
+   dependency inside `src/engine/` or `src/calc/`, or a build step for the
+   test suite that exercises them. `npm test` stays `node --test`, no install,
+   no build. `npm run dev` / `npm run build` now go through Vite for the UI.
+
+   If a task wants a dependency *inside* the engine or calc layers, that is
+   still a stop-and-say-so situation. A dependency for the UI layer is a
+   normal, expected decision — just don't add one without a reason.
 
 4. **`npm test` is green before a phase closes.** Node's built-in runner, no
    install. A phase with failing tests is not finished.
@@ -76,15 +86,22 @@ These are not preferences. Breaking one is a bug, not a style difference.
 ```
 src/engine/    units, expression parser, solver, formula runner — the real work
 src/calc/      one file per calculator, pure data, no logic
-src/ui/        rendering; knows nothing about any specific calculator
+src/ui-react/  React + TypeScript UI: one component per calculator, plus a
+               shared widget library. Every number it shows comes from
+               src/engine/ via src/ui-react/engine.ts — it never computes one.
 test/          node --test
 tools/         dev server, precache list generator
 docs/          formulas, design, the reference page
 ```
 
-`src/ui/` must never import from `src/calc/`. The UI renders whatever the
-formula runner hands it. If the UI needs to special-case a calculator, the
-definition format is missing something — fix the format.
+`src/ui-react/widgets/` must never import a specific calculator's id or
+special-case its shape — a widget takes `VarMeta`/`RunResult`, not a
+calculator id. `src/ui-react/calculators/*View.tsx` *is* allowed to be
+calculator-specific (that's the point of one component per calculator), but
+every number it renders must come from `runDefinition()`'s return value or
+the definition's own declared metadata, never a value computed in JSX. If a
+view finds itself needing arithmetic the engine doesn't already hand it, the
+definition format is missing something — fix `src/calc/<id>.js`, not the view.
 
 ## Adding or changing a calculator
 
@@ -101,8 +118,10 @@ definition format is missing something — fix the format.
 ## Commands
 
 ```sh
-npm test         # node --test, no install
-npm run dev      # http://localhost:8080 (ES modules need an http origin)
+npm test         # node --test, no install — exercises src/engine and src/calc only
+npm run dev      # vite dev server for the React UI
+npm run build    # vite build — production bundle for the React UI
+npm run test:ui  # vitest run — component tests for src/ui-react
 ```
 
 ## Decided: the `procedure` escape hatch
