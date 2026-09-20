@@ -52,14 +52,14 @@ bench-calc/
       ohm.js
       led-resistor.js
       ...                    one file per calculator, pure data
-  ui-react/                     React + TypeScript UI (see docs/superpowers/plans/2026-09-20-react-typescript-ui.md)
-    engine.ts                    the only file touching the plain-JS engine directly
-    types.ts                     CalculatorDefinition, RunResult, and friends
-    App.tsx / main.tsx           shell — sidebar + all calculator views
-    hooks/useCalculatorForm.ts   field/target state + memoized runDefinition call
-    widgets/                     Field, SeriesPicker, Headline, CheckList, ResultGrid, FormulaTrace, Sidebar
-    calculators/                 one *View.tsx per calculator, plus definitions.ts (typed src/calc/*.js re-exports)
-    style.css                custom properties, light + dark
+    ui-react/                   React + TypeScript UI (see docs/superpowers/plans/2026-09-20-react-typescript-ui.md)
+      engine.ts                  the only file touching the plain-JS engine directly
+      types.ts                   CalculatorDefinition, RunResult, and friends
+      App.tsx / main.tsx         shell — sidebar + all calculator views
+      hooks/useCalculatorForm.ts field/target state + memoized runDefinition call
+      widgets/                   Field, SeriesPicker, Headline, CheckList, ResultGrid, FormulaTrace, Sidebar
+      calculators/               one *View.tsx per calculator, plus definitions.ts (typed src/calc/*.js re-exports)
+    style.css                  custom properties, light + dark
   test/
     units.test.js
     expr.test.js
