@@ -215,7 +215,6 @@ npm install --save-dev vite @vitejs/plugin-react typescript \
 {
   "compilerOptions": {
     "composite": true,
-    "noEmit": true,
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -226,10 +225,16 @@ npm install --save-dev vite @vitejs/plugin-react typescript \
 }
 ```
 
-(`noEmit: true` matters here: without it, `tsc -b` — invoked by the `build`
-npm script — emits `vite.config.js`/`vite.config.d.ts`/`.tsbuildinfo` into the
-repo root on every build. This file exists purely for `vite.config.ts` to be
-type-checked as part of the composite project graph, never to produce JS.)
+No `noEmit` here, even though this project's only job is to type-check
+`vite.config.ts`, never to actually produce JS: TypeScript forbids a
+*referenced* project (`tsconfig.json`'s `"references"` points at this file)
+from disabling emit — `tsc --noEmit -p tsconfig.json` fails with `TS6310:
+Referenced project ... may not disable emit` if you add it. Without
+`noEmit`, `tsc -b` (invoked by the `build` npm script) emits
+`vite.config.js`/`vite.config.d.ts` into the repo root on every build, and
+`composite: true` also always writes a `.tsbuildinfo` cache file regardless
+of `noEmit`. All three are handled in `.gitignore` (Step 7) instead of
+suppressed at the compiler level.
 
 - [ ] **Step 5: Write `vite.config.ts`**
 
@@ -269,7 +274,14 @@ Add, if not already present:
 ```
 node_modules/
 dist/
+*.tsbuildinfo
+/vite.config.js
+/vite.config.d.ts
 ```
+
+The last three entries are the build-byproduct paths `tsconfig.node.json`'s
+Step 4 note explains — `tsc -b` produces them on every `npm run build`, and
+none of them are meant to be tracked.
 
 - [ ] **Step 8: Delete the old dev server**
 
@@ -421,11 +433,7 @@ import { runDefinition as runDefinitionJs } from '../engine/formula.js';
 // @ts-expect-error - plain JS
 import { eng as engJs } from '../engine/format.js';
 // @ts-expect-error - plain JS
-import {
-  nearestSeries as nearestSeriesJs,
-  seriesValues as seriesValuesJs,
-  seriesNames as seriesNamesJs,
-} from '../engine/eseries.js';
+import { nearestSeries as nearestSeriesJs, seriesValues as seriesValuesJs, seriesNames as seriesNamesJs } from '../engine/eseries.js';
 
 import type { CalculatorDefinition, RunResult } from './types';
 
@@ -451,6 +459,18 @@ export function seriesValues(series = 'E24', min = 1, max = 1e6): number[] {
 
 export const seriesNames: readonly string[] = seriesNamesJs;
 ```
+
+Every `@ts-expect-error`-guarded import above is written on a single line,
+deliberately. TypeScript attributes a missing-declaration-file diagnostic
+(`TS7016`) to the line holding the module specifier string — for a
+multi-line `import { a, b, c } from '...'`, that's the closing `} from
+'...'` line, not the `import {` line. A `@ts-expect-error` comment only
+suppresses a diagnostic on the *very next* line, so splitting one of these
+imports across multiple lines makes the comment "expect" an error on the
+wrong line: `TS2578: Unused '@ts-expect-error' directive` where the comment
+sits, and the real `TS7016` still surfaces, unsuppressed, on the `from`
+line. Keep every plain-JS import here (and in `definitions.ts`, Step 3) on
+one line.
 
 - [ ] **Step 3: Write `src/ui-react/calculators/definitions.ts`**
 
