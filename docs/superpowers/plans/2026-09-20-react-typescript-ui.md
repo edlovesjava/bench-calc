@@ -1158,6 +1158,19 @@ if (!container) throw new Error('missing #app root element');
 createRoot(container).render(<App />);
 ```
 
+Also create `src/ui-react/vite-env.d.ts`:
+
+```ts
+/// <reference types="vite/client" />
+```
+
+Without this, `tsc --noEmit` fails on `main.tsx`'s `import '../style.css'` with
+"Cannot find module '../style.css' or its corresponding type declarations" —
+this triple-slash reference is what tells TypeScript that Vite's client
+types (including bare CSS/asset imports) exist. It's the same one-line file
+every official Vite template scaffolds; this plan's Task 1 just didn't
+create it since nothing imported a non-`.ts`/`.tsx` asset until now.
+
 - [ ] **Step 3: Confirm it fails to compile** (the six view modules don't exist yet — expected)
 
 ```bash
