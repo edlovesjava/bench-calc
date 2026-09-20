@@ -1686,7 +1686,12 @@ describe('RegulatorView', () => {
 
   it('warns when Tj passes Tjmax', () => {
     render(<RegulatorView />);
-    fireEvent.change(screen.getByLabelText('Load current'), { target: { value: '0.5' } });
+    // Tj = Ta + P*Rja = 25 + (Vs-Vd-Vout)*Iout*Rja; at the defaults
+    // (Vs=9, Vd=0.8, Vout=5, Rja=50) that's 25 + 3.2*Iout*50. Iout=0.5 only
+    // reaches 105 °C (below Tjmax=125 — this is regulator.js's own second
+    // documented example), so it needs to be pushed further: 0.7 A gives
+    // P=2.24 W, Tj=137 °C, safely past 125.
+    fireEvent.change(screen.getByLabelText('Load current'), { target: { value: '0.7' } });
     expect(screen.getByText(/past 125/)).toBeInTheDocument();
   });
 
