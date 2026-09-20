@@ -227,6 +227,8 @@ Each phase ends when its tests pass. Nothing moves forward on an unproven layer.
 | **7** | Port the remaining 14 | All golden examples pass; sidebar search; app matches the design |
 | **8** | PWA — manifest, icons, service worker, `tools/precache.sh` | Installs on phone and laptop; airplane mode; update banner on new version |
 
+We are intentionally overlapping Phase 4 and Phase 6: as each calculator is added to the engine, it is also wired into the generic UI so there is a live demo while the test suite keeps the definitions honest. The engine remains the source of truth; the UI only renders it.
+
 Phases 0–3 are the real work. 4–7 are mostly transcription once the engine holds.
 
 **Later, deliberately out of v1:** parts library (IRF9540, L7805, TL431 … with
