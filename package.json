@@ -3,9 +3,27 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Offline-first bench calculators for electronics. No build step, no dependencies.",
+  "description": "Offline-first bench calculators for electronics. Engine and calculator definitions are dependency-free; the UI is React + TypeScript, built with Vite.",
   "scripts": {
     "test": "node --test \"test/**/*.test.js\"",
-    "dev": "node tools/serve.js"
+    "test:ui": "vitest run",
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "jsdom": "^29.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
   }
 }
