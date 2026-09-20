@@ -4,10 +4,11 @@ import assert from 'node:assert/strict';
 import ohm from '../src/calc/ohm.js';
 import ledResistor from '../src/calc/led-resistor.js';
 import divider from '../src/calc/divider.js';
+import regulator from '../src/calc/regulator.js';
 import { parse } from '../src/engine/expr.js';
 import { runDefinition } from '../src/engine/formula.js';
 
-const definitions = [ohm, ledResistor, divider];
+const definitions = [ohm, ledResistor, divider, regulator];
 
 function close(a, b, tol = 1e-9) {
   assert.ok(Math.abs(a - b) <= tol * Math.max(1, Math.abs(b)),
