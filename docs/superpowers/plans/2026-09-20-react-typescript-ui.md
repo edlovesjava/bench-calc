@@ -1200,6 +1200,8 @@ git commit -m "feat(ui): App shell — sidebar + all six calculator views mounte
 
 This is the fully-worked template every other calculator view (Tasks 7-11) follows. Read this one closely; the others are the same shape with a different definition and different calculator-specific extras (or lack of them).
 
+**Testing note that applies to every relation-based view (Tasks 6-10):** a relation-based view deliberately shows the solved target's value in more than one place at once — the `Headline`, and again as one of `ResultGrid`'s rows (since `result.values` includes the solved target), and its unit symbol appears a third time next to the disabled input. That's intentional UI redundancy, not a bug, but it means a page-wide `screen.getByText('5 V')` finds multiple matching elements and throws. Every view test below scopes the headline assertion with `{ selector: '.headline-label' }` / `{ selector: '.headline-value' }` for exactly this reason — keep that pattern for any new assertion against the solved target's own value. A value that is *not* the current target (e.g. a derived-only value shown only through `FormulaTrace`) has the opposite problem: `FormulaTrace` renders `{substituted} = {formatted value}` as one combined text run, so an exact string like `screen.getByText('57 °C')` won't match a node whose full text is the whole substituted line — use a regex (`screen.getByText(/57 °C/)`) instead, which matches as a substring against each candidate node.
+
 - [ ] **Step 1: Write the failing test**
 
 ```tsx
@@ -1211,14 +1213,18 @@ import { OhmView } from '../../src/ui-react/calculators/OhmView';
 describe('OhmView', () => {
   it('shows the default-solved headline for V', () => {
     render(<OhmView />);
-    expect(screen.getByText('V')).toBeInTheDocument();
-    expect(screen.getByText('5 V')).toBeInTheDocument(); // V = I*R = 50 mA * 100 ohm
+    // V's value is deliberately echoed in both the Headline and ResultGrid
+    // (and its unit symbol appears a third time on the disabled V field) —
+    // scope to the headline specifically rather than asserting a page-wide
+    // unique match.
+    expect(screen.getByText('V', { selector: '.headline-label' })).toBeInTheDocument();
+    expect(screen.getByText('5 V', { selector: '.headline-value' })).toBeInTheDocument(); // V = I*R = 50 mA * 100 ohm
   });
 
   it('re-solves when R changes', () => {
     render(<OhmView />);
     fireEvent.change(screen.getByLabelText('R'), { target: { value: '200' } });
-    expect(screen.getByText('10 V')).toBeInTheDocument();
+    expect(screen.getByText('10 V', { selector: '.headline-value' })).toBeInTheDocument();
   });
 
   it('switches target and disables the newly-computed field', () => {
@@ -1376,7 +1382,7 @@ import { LedResistorView } from '../../src/ui-react/calculators/LedResistorView'
 describe('LedResistorView', () => {
   it('solves R by default from Vs, Vf, If', () => {
     render(<LedResistorView />);
-    expect(screen.getByText('1 kΩ')).toBeInTheDocument(); // (5-2)/3mA = 1k
+    expect(screen.getByText('1 kΩ', { selector: '.headline-value' })).toBeInTheDocument(); // (5-2)/3mA = 1k
   });
 
   it('shows the Vf preset picker and applies a preset', () => {
@@ -1524,7 +1530,7 @@ import { DividerView } from '../../src/ui-react/calculators/DividerView';
 describe('DividerView', () => {
   it('solves Vout by default', () => {
     render(<DividerView />);
-    expect(screen.getByText('2.5 V')).toBeInTheDocument();
+    expect(screen.getByText('2.5 V', { selector: '.headline-value' })).toBeInTheDocument();
   });
 
   it('warns when RL is set below 10x Rsource', () => {
@@ -1669,10 +1675,13 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { RegulatorView } from '../../src/ui-react/calculators/RegulatorView';
 
 describe('RegulatorView', () => {
-  it('solves P by default and shows Tj in the result grid', () => {
+  it('solves P by default and shows Tj in the formula trace', () => {
     render(<RegulatorView />);
-    expect(screen.getByText('640 mW')).toBeInTheDocument(); // (9-0.8-5)*0.2
-    expect(screen.getByText('57 °C')).toBeInTheDocument();
+    expect(screen.getByText('640 mW', { selector: '.headline-value' })).toBeInTheDocument(); // (9-0.8-5)*0.2
+    // Tj is derived-only (not the solved target), so it never appears in
+    // ResultGrid — only inside FormulaTrace's combined "expr = value" text
+    // node, hence a substring/regex match rather than an exact one.
+    expect(screen.getByText(/57 °C/)).toBeInTheDocument();
   });
 
   it('warns when Tj passes Tjmax', () => {
@@ -1809,7 +1818,7 @@ import { DiodeView } from '../../src/ui-react/calculators/DiodeView';
 describe('DiodeView', () => {
   it('solves Vafter by default', () => {
     render(<DiodeView />);
-    expect(screen.getByText('8.2 V')).toBeInTheDocument();
+    expect(screen.getByText('8.2 V', { selector: '.headline-value' })).toBeInTheDocument();
   });
 
   it('warns when If exceeds Irated', () => {
