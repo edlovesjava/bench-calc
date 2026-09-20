@@ -90,7 +90,6 @@ src/ui-react/  React + TypeScript UI: one component per calculator, plus a
                shared widget library. Every number it shows comes from
                src/engine/ via src/ui-react/engine.ts — it never computes one.
 test/          node --test
-tools/         dev server, precache list generator
 docs/          formulas, design, the reference page
 ```
 

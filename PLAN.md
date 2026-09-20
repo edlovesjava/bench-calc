@@ -70,10 +70,13 @@ bench-calc/
   PLAN.md
 ```
 
-No bundler. ES modules load natively; they need `http://`, not `file://`, so dev
-is `python3 -m http.server 8080` and that is the whole toolchain. Tests run on
-`node --test test/` — built into Node, understands ES modules, needs nothing
-installed.
+`src/engine/` and `src/calc/` stay plain ES modules with no build step — tests
+run on `node --test test/`, built into Node, needs nothing installed. The UI
+(`src/ui-react/`) is React + TypeScript, built and served by Vite: `npm run dev`
+for local development, `npm run build` for a production bundle, `npm run
+test:ui` for its component tests. See CLAUDE.md invariant 3 and
+`docs/superpowers/plans/2026-09-20-react-typescript-ui.md` for the full
+rationale.
 
 ---
 

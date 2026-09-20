@@ -1260,7 +1260,6 @@ import { Headline } from '../widgets/Headline';
 import { CheckList } from '../widgets/CheckList';
 import { ResultGrid } from '../widgets/ResultGrid';
 import { FormulaTrace } from '../widgets/FormulaTrace';
-import { SeriesPicker } from '../widgets/SeriesPicker';
 import { eng } from '../engine';
 
 export function OhmView() {
@@ -1319,12 +1318,6 @@ export function OhmView() {
 
       <section className="panel result-panel">
         {target && <Headline label={target} value={computedDisplay ?? '—'} />}
-        {target && targetMeta?.series && (
-          <div className="adjustment">
-            <span className="adjustment-label">Nearest standard value</span>
-            <SeriesPicker unit={targetMeta.unit} onPick={() => {}} />
-          </div>
-        )}
         <CheckList checks={result.checks} />
         <ResultGrid values={result.values} vars={ohm.vars} />
       </section>
@@ -1338,7 +1331,7 @@ export function OhmView() {
 }
 ```
 
-Note the `onPick={() => {}}` on the target's `SeriesPicker`: this is a deliberate, scoped-down replacement for the old `app.js`'s editable "practical value" override field (a free-text input where you could type in the resistor you actually grabbed, e.g. "4.6k77 measured"). That feature is **not ported** — see "Deliberate simplifications" at the end of this plan. What's kept is the informational "here's the nearest E12/E24 value" picker; picking one doesn't write anywhere yet. If you want the override restored, wire `onPick` to a local `useState<number>()` and render its value next to the picker — the widget already supports it, this view just isn't using that capability yet.
+`ohm.js` declares no `adjustments`, so this view never shows the "nearest standard value" block at all — it and its `SeriesPicker` import are omitted entirely, matching the pre-migration `app.js` gate (`calc.adjustments?.find((item) => item.target === target)`), which only ever matched `led-resistor`'s `R`. See Task 7, Step 3 for the one view where this block is non-empty, and "Deliberate simplifications" at the end of this plan for why the old editable "practical value" override text field still isn't ported.
 
 - [ ] **Step 4: Run the test, confirm it passes**
 
@@ -1411,6 +1404,7 @@ npm run test:ui
 Identical structure to `OhmView.tsx`, swapping the definition:
 
 ```tsx
+import { useState } from 'react';
 import { ledResistor } from './definitions';
 import { useCalculatorForm } from '../hooks/useCalculatorForm';
 import { Field } from '../widgets/Field';
@@ -1419,10 +1413,11 @@ import { CheckList } from '../widgets/CheckList';
 import { ResultGrid } from '../widgets/ResultGrid';
 import { FormulaTrace } from '../widgets/FormulaTrace';
 import { SeriesPicker } from '../widgets/SeriesPicker';
-import { eng } from '../engine';
+import { eng, nearestSeries } from '../engine';
 
 export function LedResistorView() {
   const { values, setField, target, setTarget, targetOptions, result } = useCalculatorForm(ledResistor);
+  const [pickedValue, setPickedValue] = useState<number | undefined>(undefined);
 
   const targetMeta = target ? ledResistor.vars[target] : undefined;
   const targetValue = target ? result.values[target] : undefined;
@@ -1430,6 +1425,12 @@ export function LedResistorView() {
     target && result.valid && typeof targetValue === 'number' && Number.isFinite(targetValue)
       ? eng(targetValue, targetMeta?.unit ?? '')
       : undefined;
+  const adjustment = target ? ledResistor.adjustments?.find((item) => item.target === target) : undefined;
+  const nearestValue =
+    typeof targetValue === 'number' && Number.isFinite(targetValue)
+      ? nearestSeries(targetValue, 'E24')
+      : undefined;
+  const practicalValue = pickedValue ?? nearestValue;
 
   return (
     <section className="calculator" aria-label={ledResistor.title}>
@@ -1477,10 +1478,13 @@ export function LedResistorView() {
 
       <section className="panel result-panel">
         {target && <Headline label={target} value={computedDisplay ?? '—'} />}
-        {target && targetMeta?.series && (
+        {adjustment && (
           <div className="adjustment">
-            <span className="adjustment-label">Nearest standard value</span>
-            <SeriesPicker unit={targetMeta.unit} onPick={() => {}} />
+            <span className="adjustment-label">{adjustment.label}</span>
+            <SeriesPicker unit={targetMeta?.unit ?? ''} onPick={setPickedValue} />
+            {practicalValue !== undefined && (
+              <span className="adjustment-value">{eng(practicalValue, targetMeta?.unit ?? '')}</span>
+            )}
           </div>
         )}
         <CheckList checks={result.checks} />
@@ -1495,6 +1499,8 @@ export function LedResistorView() {
   );
 }
 ```
+
+The "nearest standard value" block is gated on `ledResistor.adjustments` — the declared array with one entry, `{ id: 'standard-resistor', target: 'R', label: 'Adjust to nearest', modes: ['E12', 'E24'] }` — matching the pre-migration `app.js`'s gate (`calc.adjustments?.find((item) => item.target === target)`), rather than the broader `targetMeta?.series` flag (which would also fire on `ohm` and `divider`, calculators the old app never showed this block for). `led-resistor` is the only definition that declares `adjustments`, so this is the only view where the block is ever non-empty. `practicalValue` defaults to `nearestSeries(targetValue, 'E24')` so the block shows a real readout immediately, and `SeriesPicker`'s `onPick` is wired to `setPickedValue`, a real state setter — picking a specific value from the list overrides the default. (The old `app.js`'s separate free-text "practical value" override field is still not ported — see "Deliberate simplifications" at the end of this plan.)
 
 - [ ] **Step 4: Run the test, confirm it passes**
 
@@ -1539,10 +1545,10 @@ describe('DividerView', () => {
     expect(screen.getByText(/load is now part of the divider/)).toBeInTheDocument();
   });
 
-  it('shows the nearest-standard-value picker when R1 is the target', () => {
+  it('has no nearest-standard-value block, since divider.js declares no adjustments', () => {
     render(<DividerView />);
     fireEvent.change(screen.getByLabelText('Solve for'), { target: { value: 'R1' } });
-    expect(screen.getByText('Nearest standard value')).toBeInTheDocument();
+    expect(screen.queryByText('Adjust to nearest')).not.toBeInTheDocument();
   });
 });
 ```
@@ -1565,7 +1571,6 @@ import { Headline } from '../widgets/Headline';
 import { CheckList } from '../widgets/CheckList';
 import { ResultGrid } from '../widgets/ResultGrid';
 import { FormulaTrace } from '../widgets/FormulaTrace';
-import { SeriesPicker } from '../widgets/SeriesPicker';
 import { eng } from '../engine';
 
 export function DividerView() {
@@ -1624,12 +1629,6 @@ export function DividerView() {
 
       <section className="panel result-panel">
         {target && <Headline label={target} value={computedDisplay ?? '—'} />}
-        {target && targetMeta?.series && (
-          <div className="adjustment">
-            <span className="adjustment-label">Nearest standard value</span>
-            <SeriesPicker unit={targetMeta.unit} onPick={() => {}} />
-          </div>
-        )}
         <CheckList checks={result.checks} />
         <ResultGrid values={result.values} vars={divider.vars} />
       </section>
@@ -1642,6 +1641,8 @@ export function DividerView() {
   );
 }
 ```
+
+`divider.js` declares no `adjustments`, so — same as `OhmView` — this view omits the "nearest standard value" block and its `SeriesPicker` import entirely, rather than gating on `targetMeta?.series` (which would incorrectly show it for `R1`/`R2`/`RL`, none of which `app.js` ever showed this block for).
 
 - [ ] **Step 4: Run the test, confirm it passes**
 
@@ -1960,9 +1961,12 @@ describe('EseriesView', () => {
 
   it('switches series and recomputes', () => {
     render(<EseriesView />);
+    // E12 nearest to 4780 is also 4700 (10*470 in E12), so the "nearest value"
+    // readout alone can't tell E24 and E12 apart. bandLow genuinely differs
+    // between them (E24 tolerance is 5%, E12 is 10%), so assert on that instead.
+    expect(screen.getByText('4.46 kΩ')).toBeInTheDocument(); // E24 band low: eng(4700 * 0.95, 'ohm')
     fireEvent.change(screen.getByLabelText('Series'), { target: { value: 'E12' } });
-    // E12 nearest to 4780 is also 4700 (10*470 in E12), but confirm the output panel re-rendered
-    expect(screen.getByText('4.7 kΩ')).toBeInTheDocument();
+    expect(screen.getByText('4.23 kΩ')).toBeInTheDocument(); // E12 band low: eng(4700 * 0.90, 'ohm')
   });
 
   it('has no solve-for control', () => {
@@ -2129,7 +2133,7 @@ git commit -m "chore: retire src/ui/app.js now that the React UI is the only UI"
 
 ## Deliberate simplifications (not bugs, not forgotten)
 
-- **The old "editable practical value" override** (a free-text field next to the E-series adjustment, letting you record e.g. "used 4k67 measured") is not ported. The new `SeriesPicker` widget shows the nearest standard value only. See the note in Task 6, Step 3 for how to restore it if wanted later.
+- **The old "editable practical value" override** (a free-text field next to the E-series adjustment, letting you record e.g. "used 4k67 measured") is not ported. What *is* restored (post final-review fix wave) is the nearest-value **display** itself: `LedResistorView` now defaults `practicalValue` to `nearestSeries(targetValue, 'E24')` so a real readout shows immediately, before any manual pick, and `SeriesPicker`'s `onPick` writes to a real `useState` rather than a no-op — picking a value from the list overrides the default. The block's trigger was also corrected back to the definition's own declared `adjustments` (matching the pre-migration `app.js`'s `calc.adjustments?.find((item) => item.target === target)` gate) rather than the broader `targetMeta?.series` flag it briefly used, which had widened it to `ohm` and `divider` as well — neither of which declares `adjustments` or showed this block before.
 - **`FormulaTrace` is new UI, not a straight port.** The old `app.js` never rendered `result.trace` — it didn't exist before this session's `formula.js` hardening. Every view in this plan wires it up for the first time.
 - **`EseriesView` doesn't use most of the shared widget set** (no `Headline`, no `FormulaTrace`, no solve-for select) because `eseries` genuinely has no target/relation/trace. This is intended, not a gap — see Task 11's Interfaces note.
 - **Hash-based routing (`#/ohm?V=5&R=100`) is out of scope for this plan.** The old `app.js` didn't have it either, despite `PLAN.md` §5 floating it as a future nicety tied to phase 6/8 (bookmarkable state, "most of saved scenarios for twenty lines"). `App.tsx`'s `activeId` state is a plain `useState`, not synced to the URL. If it's wanted, it's a follow-on task: swap `useState` for a small `useSyncExternalStore` on `window.location.hash`, or reach for a router — deliberately not decided here to avoid pulling in a dependency this plan doesn't otherwise need.

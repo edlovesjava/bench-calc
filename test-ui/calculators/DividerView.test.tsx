@@ -14,9 +14,9 @@ describe('DividerView', () => {
     expect(screen.getByText(/load is now part of the divider/)).toBeInTheDocument();
   });
 
-  it('shows the nearest-standard-value picker when R1 is the target', () => {
+  it('has no nearest-standard-value block, since divider.js declares no adjustments', () => {
     render(<DividerView />);
     fireEvent.change(screen.getByLabelText('Solve for'), { target: { value: 'R1' } });
-    expect(screen.getByText('Nearest standard value')).toBeInTheDocument();
+    expect(screen.queryByText('Adjust to nearest')).not.toBeInTheDocument();
   });
 });

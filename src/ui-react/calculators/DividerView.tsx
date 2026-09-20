@@ -5,7 +5,6 @@ import { Headline } from '../widgets/Headline';
 import { CheckList } from '../widgets/CheckList';
 import { ResultGrid } from '../widgets/ResultGrid';
 import { FormulaTrace } from '../widgets/FormulaTrace';
-import { SeriesPicker } from '../widgets/SeriesPicker';
 import { eng } from '../engine';
 
 export function DividerView() {
@@ -64,12 +63,6 @@ export function DividerView() {
 
       <section className="panel result-panel">
         {target && <Headline label={target} value={computedDisplay ?? '—'} />}
-        {target && targetMeta?.series && (
-          <div className="adjustment">
-            <span className="adjustment-label">Nearest standard value</span>
-            <SeriesPicker unit={targetMeta.unit} onPick={() => {}} />
-          </div>
-        )}
         <CheckList checks={result.checks} />
         <ResultGrid values={result.values} vars={divider.vars} />
       </section>
