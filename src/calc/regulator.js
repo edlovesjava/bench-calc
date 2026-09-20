@@ -15,6 +15,7 @@ export default {
     Rjc: { unit: 'degC/W', label: 'Rthjc', default: '5' },
     Rsa: { unit: 'degC/W', label: 'Rcs + Rsa, with sink', default: '11' },
     Vdrop: { unit: 'V', label: 'Dropout', default: '2' },
+    Tjmax: { unit: 'degC', label: 'Tj max', default: '125' },
     P: { unit: 'W', label: 'Dissipated power', default: '' },
   },
 
@@ -31,7 +32,7 @@ export default {
     { id: 'Tj', unit: 'degC', expr: 'Ta + P * Rja', label: 'Junction temp, bare' },
     { id: 'Rsink', unit: 'degC/W', expr: 'Rjc + Rsa', label: 'Rthj-a with sink' },
     { id: 'Tjsink', unit: 'degC', expr: 'Ta + P * Rsink', label: 'Junction temp, with sink' },
-    { id: 'Imax', unit: 'A', expr: '(125 - Ta) / (Rja * head)', label: 'Max Iout before thermal shutdown, bare' },
+    { id: 'Imax', unit: 'A', expr: '(Tjmax - Ta) / (Rja * head)', label: 'Max Iout before thermal shutdown, bare' },
     { id: 'effReg', unit: '', expr: 'Vout / Vin', label: 'Regulator efficiency' },
     { id: 'effBoard', unit: '', expr: 'Vout / Vs', label: 'Board efficiency' },
   ],
@@ -40,10 +41,10 @@ export default {
     { when: 'head < Vdrop', level: 'warn',
       text: 'Only {head} of headroom against a {Vdrop} dropout. The output will ' +
             'sag and follow the input, ripple and all.' },
-    { when: 'Tj > 125', level: 'warn',
-      text: 'Junction at {Tj} is past 125 °C — thermal shutdown will cycle it.' },
-    { when: 'Tj > 100', level: 'warn',
-      text: 'Junction at {Tj} is within 25 °C of shutdown; a warm day takes it over.' },
+    { when: 'Tj > Tjmax', level: 'warn',
+      text: 'Junction at {Tj} is past {Tjmax} — thermal shutdown will cycle it.' },
+    { when: 'Tj > Tjmax - 25', level: 'warn',
+      text: 'Junction at {Tj} is within 25 °C of {Tjmax}; a warm day takes it over.' },
   ],
 
   symbols: {

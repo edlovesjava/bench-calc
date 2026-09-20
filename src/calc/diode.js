@@ -10,6 +10,7 @@ export default {
     Vf: { unit: 'V', label: 'Vf at this current', default: '0.8' },
     If: { unit: 'A', label: 'Current', default: '200m' },
     Irated: { unit: 'A', label: 'Part rating If(AV)', default: '1' },
+    VfSchottky: { unit: 'V', label: 'Vf a Schottky would drop', default: '0.35' },
     Vafter: { unit: 'V', label: 'Voltage after', default: '' },
   },
 
@@ -25,7 +26,7 @@ export default {
   derived: [
     { id: 'P', unit: 'W', expr: 'Vf * If', label: 'Power in the diode' },
     { id: 'frac', unit: '', expr: 'If / Irated', label: 'Fraction of rating' },
-    { id: 'saved', unit: 'W', expr: '(Vf - 0.35) * If', label: 'What a Schottky would save' },
+    { id: 'saved', unit: 'W', expr: '(Vf - VfSchottky) * If', label: 'What a Schottky would save' },
   ],
 
   checks: [
