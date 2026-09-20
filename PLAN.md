@@ -65,6 +65,10 @@ bench-calc/
     expr.test.js
     solve.test.js
     definitions.test.js      sweeps every calculator
+  test-ui/                  vitest + React Testing Library, for src/ui-react
+    setup.ts
+    widgets/
+    calculators/
   tools/
     precache.sh              regenerates the sw.js file list
   PLAN.md
