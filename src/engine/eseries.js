@@ -14,7 +14,10 @@ export function nearestSeries(value, series = 'E24') {
   for (let decade = exponent - 1; decade <= exponent + 1; decade += 1) {
     const scale = 10 ** (decade - 1);
     for (const base of bases) {
-      const candidate = base * scale;
+      // base * scale can pick up binary floating-point noise (e.g. 11 * 1e-4
+      // = 0.0010999999999999998) even though every value here is a round
+      // decimal. Snap back to 12 significant figures, same as seriesValues.
+      const candidate = Number((base * scale).toPrecision(12));
       const candidateDistance = Math.abs(Math.log(candidate / value));
       if (candidateDistance < distance) {
         nearest = candidate;
