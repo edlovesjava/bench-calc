@@ -398,6 +398,67 @@ code {
   font-size: 13px;
 }
 
+.check.info {
+  border: 1px solid var(--rule);
+  background: var(--panel);
+}
+
+.diagram {
+  margin: 14px 0 0;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+
+.diagram svg {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.diagram .wire {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* Breaks the straight wire behind each resistor body. */
+.diagram .gap {
+  fill: var(--panel);
+}
+
+.diagram .terminal {
+  fill: var(--surface);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.diagram text {
+  font-family: var(--f-mono);
+  text-anchor: middle;
+}
+
+.diagram .part-label {
+  font-size: 12px;
+  fill: var(--muted);
+}
+
+.diagram .part-value {
+  font-size: 14px;
+  fill: var(--ink);
+}
+
+.diagram .part-total {
+  font-size: 15px;
+  font-weight: 500;
+  fill: var(--accent);
+}
+
 .check.fail {
   border-left-color: var(--fail);
   background: var(--fail-soft);

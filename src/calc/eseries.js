@@ -10,7 +10,7 @@ export default {
   id: 'eseries',
   kind: 'procedure',
   group: 'units-parts',
-  title: 'E-series and combos',
+  title: 'E-series nearest value',
   blurb: 'Snap a target resistance to the nearest standard value, with the ' +
          'tolerance band that comes with it.',
 
@@ -41,6 +41,8 @@ export default {
   checks: [
     { when: 'abs(error) > 0.1', level: 'warn',
       text: '{nearest} is more than 10% off {t} — check the series and decade.' },
+    { when: 'abs(error) > 0.005', level: 'info',
+      text: 'Need it closer? Two parts in series or parallel can often hit {t} exactly — see E-series combos.' },
   ],
 
   examples: [

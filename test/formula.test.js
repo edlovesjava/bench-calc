@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import ohm from '../src/calc/ohm.js';
 import ledResistor from '../src/calc/led-resistor.js';
+import ecombo from '../src/calc/ecombo.js';
 import { runDefinition } from '../src/engine/formula.js';
 
 function close(a, b, tol = 1e-9) {
@@ -79,4 +80,18 @@ test('formula runner emits a worked-arithmetic trace from the same AST as the an
   const relationStep = result.trace[0];
   assert.match(relationStep.substituted, /100/);
   close(relationStep.value, result.values[result.target]);
+});
+
+test('procedure diagram resolves topology and part values', () => {
+  const result = runDefinition(ecombo, { t: '2350', series: 'E24', topology: 'parallel' });
+  assert.equal(result.diagram.kind, 'resistors');
+  assert.equal(result.diagram.topology, 'parallel');
+  assert.deepEqual(result.diagram.parts.map((p) => [p.label, p.value]), [['Ra', 4700], ['Rb', 4700]]);
+  assert.equal(result.diagram.total.value, 2350);
+});
+
+test('procedure diagram is withheld rather than half-drawn', () => {
+  assert.equal(runDefinition(ecombo, { t: '0', series: 'E24', topology: 'series' }).diagram, null);
+  assert.equal(runDefinition(ecombo, { t: 'junk', series: 'E24', topology: 'series' }).diagram, null);
+  assert.equal(runDefinition(ohm, { V: '5', R: '1k' }, { solveFor: 'I' }).diagram, undefined);
 });

@@ -152,6 +152,40 @@ function runRelation(definition, input, options) {
   };
 }
 
+const TOPOLOGIES = new Set(['series', 'parallel']);
+
+/**
+ * Resolve a definition's `diagram` block into concrete values the UI can draw.
+ *
+ *   diagram: {
+ *     kind: 'resistors',
+ *     topology: 'topology',              // a mode var's name, or 'series' / 'parallel'
+ *     parts: [{ id: 'a', label: 'Ra' }, ...],
+ *     total: { id: 'value', label: 'Rtotal' },
+ *   }
+ *
+ * Returns null — no picture — when any part is missing or not a finite
+ * number. A half-drawn circuit with a blank resistor is a plausible guess.
+ */
+function resolveDiagram(definition, scope, unitForName) {
+  const spec = definition.diagram;
+  if (!spec) return null;
+
+  const topology = TOPOLOGIES.has(spec.topology) ? spec.topology : scope[spec.topology];
+  if (!TOPOLOGIES.has(topology)) return null;
+
+  const resolve = ({ id, label }) => {
+    const value = scope[id];
+    if (!Number.isFinite(value)) return null;
+    return { id, label, value, text: eng(value, unitForName(id)) };
+  };
+  const parts = (spec.parts ?? []).map(resolve);
+  const total = spec.total ? resolve(spec.total) : null;
+  if (parts.length === 0 || parts.includes(null) || (spec.total && !total)) return null;
+
+  return { kind: spec.kind, topology, parts, total };
+}
+
 function runProcedure(definition, input) {
   const { values, fieldErrors } = resolveVars(definition, input, null);
   const unitForName = unitLookup(definition);
@@ -159,7 +193,7 @@ function runProcedure(definition, input) {
   if (fieldErrors.length > 0) {
     return {
       definition, values, derived: {}, relation: null, target: null,
-      checks: [], trace: [], fieldErrors, valid: false,
+      checks: [], trace: [], fieldErrors, valid: false, diagram: null,
     };
   }
 
@@ -176,6 +210,7 @@ function runProcedure(definition, input) {
   return {
     definition, values, derived, relation: null, target: null,
     checks, trace: [], fieldErrors, valid,
+    diagram: resolveDiagram(definition, scope, unitForName),
   };
 }
 

@@ -22,6 +22,78 @@ const state = {
   values: {},
 };
 
+/** Zigzag resistor body, `RES_W` long, starting at (x, y). */
+const RES_W = 60;
+function zigzag(x, y) {
+  const pts = [[x, y], [x + 5, y - 8]];
+  for (let k = 1; k <= 5; k += 1) pts.push([x + 5 + k * 10, y + (k % 2 ? 8 : -8)]);
+  pts.push([x + RES_W, y]);
+  return `<polyline class="wire" points="${pts.map((p) => p.join(',')).join(' ')}"/>`;
+}
+
+function terminal(x, y) {
+  return `<circle class="terminal" cx="${x}" cy="${y}" r="4"/>`;
+}
+
+/**
+ * Draw a resolved `result.diagram` of kind 'resistors': parts end to end for
+ * series, stacked between two rails for parallel. Every label and value comes
+ * from the resolved diagram; nothing here knows which calculator it is.
+ */
+function resistorDiagram({ topology, parts, total }) {
+  const join = topology === 'parallel' ? ' in parallel with ' : ' in series with ';
+  const aria = parts.map((p) => `${p.label} ${p.text}`).join(join) + (total ? `, giving ${total.text}` : '');
+  let body = '';
+  let width;
+  let height;
+
+  if (topology === 'series') {
+    const cell = RES_W + 60;
+    width = 40 + parts.length * cell;
+    const y = 44;
+    body += terminal(16, y) + `<line class="wire" x1="20" y1="${y}" x2="${width - 20}" y2="${y}"/>`;
+    parts.forEach((p, i) => {
+      const x = 20 + i * cell + 30;
+      body += `<rect class="gap" x="${x}" y="${y - 2}" width="${RES_W}" height="4"/>` + zigzag(x, y)
+        + `<text class="part-label" x="${x + RES_W / 2}" y="${y - 18}">${p.label}</text>`
+        + `<text class="part-value" x="${x + RES_W / 2}" y="${y + 30}">${p.text}</text>`;
+    });
+    body += terminal(width - 16, y);
+    height = total ? 120 : 92;
+  } else {
+    const pitch = 72;
+    const top = 40;
+    const bottom = top + (parts.length - 1) * pitch;
+    const mid = (top + bottom) / 2;
+    const left = 50;
+    const right = 230;
+    width = 280;
+    body += `<line class="wire" x1="${left}" y1="${top}" x2="${left}" y2="${bottom}"/>`
+      + `<line class="wire" x1="${right}" y1="${top}" x2="${right}" y2="${bottom}"/>`
+      + terminal(16, mid) + `<line class="wire" x1="20" y1="${mid}" x2="${left}" y2="${mid}"/>`
+      + terminal(width - 16, mid) + `<line class="wire" x1="${right}" y1="${mid}" x2="${width - 20}" y2="${mid}"/>`;
+    parts.forEach((p, i) => {
+      const y = top + i * pitch;
+      const x = (left + right - RES_W) / 2;
+      body += `<line class="wire" x1="${left}" y1="${y}" x2="${x}" y2="${y}"/>`
+        + `<line class="wire" x1="${x + RES_W}" y1="${y}" x2="${right}" y2="${y}"/>`
+        + `<rect class="gap" x="${x}" y="${y - 2}" width="${RES_W}" height="4"/>` + zigzag(x, y)
+        + `<text class="part-label" x="${x + RES_W / 2}" y="${y - 16}">${p.label}</text>`
+        + `<text class="part-value" x="${x + RES_W / 2}" y="${y + 28}">${p.text}</text>`;
+    });
+    height = bottom + (total ? 76 : 44);
+  }
+
+  if (total) {
+    body += `<text class="part-total" x="${width / 2}" y="${height - 12}">${total.label} = ${total.text}</text>`;
+  }
+  return `
+    <figure class="diagram">
+      <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${aria}">${body}</svg>
+    </figure>
+  `;
+}
+
 function currentCalculator() {
   return calculators.find((calc) => calc.id === state.selectedId) ?? calculators[0];
 }
@@ -170,6 +242,7 @@ function render() {
               <span class="unit">${calc.vars[target]?.unit ?? ''}</span>
             </div>
           ` : ''}
+          ${result.diagram?.kind === 'resistors' ? resistorDiagram(result.diagram) : ''}
           ${result.checks.length ? `
             <div class="check-list">
               ${result.checks.map((check) => `<div class="check ${check.level}">${check.text}</div>`).join('')}
