@@ -225,6 +225,20 @@ npm install --save-dev vite @vitejs/plugin-react typescript \
 }
 ```
 
+<<<<<<< HEAD
+=======
+No `noEmit` here, even though this project's only job is to type-check
+`vite.config.ts`, never to actually produce JS: TypeScript forbids a
+*referenced* project (`tsconfig.json`'s `"references"` points at this file)
+from disabling emit — `tsc --noEmit -p tsconfig.json` fails with `TS6310:
+Referenced project ... may not disable emit` if you add it. Without
+`noEmit`, `tsc -b` (invoked by the `build` npm script) emits
+`vite.config.js`/`vite.config.d.ts` into the repo root on every build, and
+`composite: true` also always writes a `.tsbuildinfo` cache file regardless
+of `noEmit`. All three are handled in `.gitignore` (Step 7) instead of
+suppressed at the compiler level.
+
+>>>>>>> origin/main
 - [ ] **Step 5: Write `vite.config.ts`**
 
 ```ts
@@ -263,8 +277,20 @@ Add, if not already present:
 ```
 node_modules/
 dist/
+<<<<<<< HEAD
 ```
 
+=======
+*.tsbuildinfo
+/vite.config.js
+/vite.config.d.ts
+```
+
+The last three entries are the build-byproduct paths `tsconfig.node.json`'s
+Step 4 note explains — `tsc -b` produces them on every `npm run build`, and
+none of them are meant to be tracked.
+
+>>>>>>> origin/main
 - [ ] **Step 8: Delete the old dev server**
 
 ```bash
@@ -415,11 +441,15 @@ import { runDefinition as runDefinitionJs } from '../engine/formula.js';
 // @ts-expect-error - plain JS
 import { eng as engJs } from '../engine/format.js';
 // @ts-expect-error - plain JS
+<<<<<<< HEAD
 import {
   nearestSeries as nearestSeriesJs,
   seriesValues as seriesValuesJs,
   seriesNames as seriesNamesJs,
 } from '../engine/eseries.js';
+=======
+import { nearestSeries as nearestSeriesJs, seriesValues as seriesValuesJs, seriesNames as seriesNamesJs } from '../engine/eseries.js';
+>>>>>>> origin/main
 
 import type { CalculatorDefinition, RunResult } from './types';
 
@@ -446,6 +476,21 @@ export function seriesValues(series = 'E24', min = 1, max = 1e6): number[] {
 export const seriesNames: readonly string[] = seriesNamesJs;
 ```
 
+<<<<<<< HEAD
+=======
+Every `@ts-expect-error`-guarded import above is written on a single line,
+deliberately. TypeScript attributes a missing-declaration-file diagnostic
+(`TS7016`) to the line holding the module specifier string — for a
+multi-line `import { a, b, c } from '...'`, that's the closing `} from
+'...'` line, not the `import {` line. A `@ts-expect-error` comment only
+suppresses a diagnostic on the *very next* line, so splitting one of these
+imports across multiple lines makes the comment "expect" an error on the
+wrong line: `TS2578: Unused '@ts-expect-error' directive` where the comment
+sits, and the real `TS7016` still surfaces, unsuppressed, on the `from`
+line. Keep every plain-JS import here (and in `definitions.ts`, Step 3) on
+one line.
+
+>>>>>>> origin/main
 - [ ] **Step 3: Write `src/ui-react/calculators/definitions.ts`**
 
 ```ts
@@ -580,8 +625,27 @@ Create `test-ui/setup.ts`:
 
 ```ts
 import '@testing-library/jest-dom/vitest';
+<<<<<<< HEAD
 ```
 
+=======
+import { afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+
+afterEach(() => {
+  cleanup();
+});
+```
+
+The `afterEach(cleanup)` matters from Task 4 onward: any test file that
+calls `render()` more than once (or has more than one test with its own
+`render()`) leaves prior DOM mounted without it, and later `screen.getBy*`
+queries fail with "Found multiple elements" — not a bug in the component
+under test, just accumulated DOM from earlier renders in the same file.
+`useCalculatorForm.test.tsx` (Task 3) never hit this because `renderHook`
+doesn't mount into the shared document the way `render()` does.
+
+>>>>>>> origin/main
 - [ ] **Step 3: Run it, confirm it fails**
 
 ```bash
@@ -1118,6 +1182,22 @@ if (!container) throw new Error('missing #app root element');
 createRoot(container).render(<App />);
 ```
 
+<<<<<<< HEAD
+=======
+Also create `src/ui-react/vite-env.d.ts`:
+
+```ts
+/// <reference types="vite/client" />
+```
+
+Without this, `tsc --noEmit` fails on `main.tsx`'s `import '../style.css'` with
+"Cannot find module '../style.css' or its corresponding type declarations" —
+this triple-slash reference is what tells TypeScript that Vite's client
+types (including bare CSS/asset imports) exist. It's the same one-line file
+every official Vite template scaffolds; this plan's Task 1 just didn't
+create it since nothing imported a non-`.ts`/`.tsx` asset until now.
+
+>>>>>>> origin/main
 - [ ] **Step 3: Confirm it fails to compile** (the six view modules don't exist yet — expected)
 
 ```bash
@@ -1147,6 +1227,11 @@ git commit -m "feat(ui): App shell — sidebar + all six calculator views mounte
 
 This is the fully-worked template every other calculator view (Tasks 7-11) follows. Read this one closely; the others are the same shape with a different definition and different calculator-specific extras (or lack of them).
 
+<<<<<<< HEAD
+=======
+**Testing note that applies to every relation-based view (Tasks 6-10):** a relation-based view deliberately shows the solved target's value in more than one place at once — the `Headline`, and again as one of `ResultGrid`'s rows (since `result.values` includes the solved target), and its unit symbol appears a third time next to the disabled input. That's intentional UI redundancy, not a bug, but it means a page-wide `screen.getByText('5 V')` finds multiple matching elements and throws. Every view test below scopes the headline assertion with `{ selector: '.headline-label' }` / `{ selector: '.headline-value' }` for exactly this reason — keep that pattern for any new assertion against the solved target's own value. A value that is *not* the current target (e.g. a derived-only value shown only through `FormulaTrace`) has the opposite problem: `FormulaTrace` renders `{substituted} = {formatted value}` as one combined text run, so an exact string like `screen.getByText('57 °C')` won't match a node whose full text is the whole substituted line — use a regex (`screen.getByText(/57 °C/)`) instead, which matches as a substring against each candidate node.
+
+>>>>>>> origin/main
 - [ ] **Step 1: Write the failing test**
 
 ```tsx
@@ -1158,14 +1243,27 @@ import { OhmView } from '../../src/ui-react/calculators/OhmView';
 describe('OhmView', () => {
   it('shows the default-solved headline for V', () => {
     render(<OhmView />);
+<<<<<<< HEAD
     expect(screen.getByText('V')).toBeInTheDocument();
     expect(screen.getByText('5 V')).toBeInTheDocument(); // V = I*R = 50 mA * 100 ohm
+=======
+    // V's value is deliberately echoed in both the Headline and ResultGrid
+    // (and its unit symbol appears a third time on the disabled V field) —
+    // scope to the headline specifically rather than asserting a page-wide
+    // unique match.
+    expect(screen.getByText('V', { selector: '.headline-label' })).toBeInTheDocument();
+    expect(screen.getByText('5 V', { selector: '.headline-value' })).toBeInTheDocument(); // V = I*R = 50 mA * 100 ohm
+>>>>>>> origin/main
   });
 
   it('re-solves when R changes', () => {
     render(<OhmView />);
     fireEvent.change(screen.getByLabelText('R'), { target: { value: '200' } });
+<<<<<<< HEAD
     expect(screen.getByText('10 V')).toBeInTheDocument();
+=======
+    expect(screen.getByText('10 V', { selector: '.headline-value' })).toBeInTheDocument();
+>>>>>>> origin/main
   });
 
   it('switches target and disables the newly-computed field', () => {
@@ -1201,7 +1299,10 @@ import { Headline } from '../widgets/Headline';
 import { CheckList } from '../widgets/CheckList';
 import { ResultGrid } from '../widgets/ResultGrid';
 import { FormulaTrace } from '../widgets/FormulaTrace';
+<<<<<<< HEAD
 import { SeriesPicker } from '../widgets/SeriesPicker';
+=======
+>>>>>>> origin/main
 import { eng } from '../engine';
 
 export function OhmView() {
@@ -1260,12 +1361,15 @@ export function OhmView() {
 
       <section className="panel result-panel">
         {target && <Headline label={target} value={computedDisplay ?? '—'} />}
+<<<<<<< HEAD
         {target && targetMeta?.series && (
           <div className="adjustment">
             <span className="adjustment-label">Nearest standard value</span>
             <SeriesPicker unit={targetMeta.unit} onPick={() => {}} />
           </div>
         )}
+=======
+>>>>>>> origin/main
         <CheckList checks={result.checks} />
         <ResultGrid values={result.values} vars={ohm.vars} />
       </section>
@@ -1279,7 +1383,11 @@ export function OhmView() {
 }
 ```
 
+<<<<<<< HEAD
 Note the `onPick={() => {}}` on the target's `SeriesPicker`: this is a deliberate, scoped-down replacement for the old `app.js`'s editable "practical value" override field (a free-text input where you could type in the resistor you actually grabbed, e.g. "4.6k77 measured"). That feature is **not ported** — see "Deliberate simplifications" at the end of this plan. What's kept is the informational "here's the nearest E12/E24 value" picker; picking one doesn't write anywhere yet. If you want the override restored, wire `onPick` to a local `useState<number>()` and render its value next to the picker — the widget already supports it, this view just isn't using that capability yet.
+=======
+`ohm.js` declares no `adjustments`, so this view never shows the "nearest standard value" block at all — it and its `SeriesPicker` import are omitted entirely, matching the pre-migration `app.js` gate (`calc.adjustments?.find((item) => item.target === target)`), which only ever matched `led-resistor`'s `R`. See Task 7, Step 3 for the one view where this block is non-empty, and "Deliberate simplifications" at the end of this plan for why the old editable "practical value" override text field still isn't ported.
+>>>>>>> origin/main
 
 - [ ] **Step 4: Run the test, confirm it passes**
 
@@ -1323,7 +1431,11 @@ import { LedResistorView } from '../../src/ui-react/calculators/LedResistorView'
 describe('LedResistorView', () => {
   it('solves R by default from Vs, Vf, If', () => {
     render(<LedResistorView />);
+<<<<<<< HEAD
     expect(screen.getByText('1 kΩ')).toBeInTheDocument(); // (5-2)/3mA = 1k
+=======
+    expect(screen.getByText('1 kΩ', { selector: '.headline-value' })).toBeInTheDocument(); // (5-2)/3mA = 1k
+>>>>>>> origin/main
   });
 
   it('shows the Vf preset picker and applies a preset', () => {
@@ -1352,6 +1464,10 @@ npm run test:ui
 Identical structure to `OhmView.tsx`, swapping the definition:
 
 ```tsx
+<<<<<<< HEAD
+=======
+import { useState } from 'react';
+>>>>>>> origin/main
 import { ledResistor } from './definitions';
 import { useCalculatorForm } from '../hooks/useCalculatorForm';
 import { Field } from '../widgets/Field';
@@ -1360,10 +1476,18 @@ import { CheckList } from '../widgets/CheckList';
 import { ResultGrid } from '../widgets/ResultGrid';
 import { FormulaTrace } from '../widgets/FormulaTrace';
 import { SeriesPicker } from '../widgets/SeriesPicker';
+<<<<<<< HEAD
 import { eng } from '../engine';
 
 export function LedResistorView() {
   const { values, setField, target, setTarget, targetOptions, result } = useCalculatorForm(ledResistor);
+=======
+import { eng, nearestSeries } from '../engine';
+
+export function LedResistorView() {
+  const { values, setField, target, setTarget, targetOptions, result } = useCalculatorForm(ledResistor);
+  const [pickedValue, setPickedValue] = useState<number | undefined>(undefined);
+>>>>>>> origin/main
 
   const targetMeta = target ? ledResistor.vars[target] : undefined;
   const targetValue = target ? result.values[target] : undefined;
@@ -1371,6 +1495,15 @@ export function LedResistorView() {
     target && result.valid && typeof targetValue === 'number' && Number.isFinite(targetValue)
       ? eng(targetValue, targetMeta?.unit ?? '')
       : undefined;
+<<<<<<< HEAD
+=======
+  const adjustment = target ? ledResistor.adjustments?.find((item) => item.target === target) : undefined;
+  const nearestValue =
+    typeof targetValue === 'number' && Number.isFinite(targetValue)
+      ? nearestSeries(targetValue, 'E24')
+      : undefined;
+  const practicalValue = pickedValue ?? nearestValue;
+>>>>>>> origin/main
 
   return (
     <section className="calculator" aria-label={ledResistor.title}>
@@ -1418,10 +1551,20 @@ export function LedResistorView() {
 
       <section className="panel result-panel">
         {target && <Headline label={target} value={computedDisplay ?? '—'} />}
+<<<<<<< HEAD
         {target && targetMeta?.series && (
           <div className="adjustment">
             <span className="adjustment-label">Nearest standard value</span>
             <SeriesPicker unit={targetMeta.unit} onPick={() => {}} />
+=======
+        {adjustment && (
+          <div className="adjustment">
+            <span className="adjustment-label">{adjustment.label}</span>
+            <SeriesPicker unit={targetMeta?.unit ?? ''} onPick={setPickedValue} />
+            {practicalValue !== undefined && (
+              <span className="adjustment-value">{eng(practicalValue, targetMeta?.unit ?? '')}</span>
+            )}
+>>>>>>> origin/main
           </div>
         )}
         <CheckList checks={result.checks} />
@@ -1437,6 +1580,11 @@ export function LedResistorView() {
 }
 ```
 
+<<<<<<< HEAD
+=======
+The "nearest standard value" block is gated on `ledResistor.adjustments` — the declared array with one entry, `{ id: 'standard-resistor', target: 'R', label: 'Adjust to nearest', modes: ['E12', 'E24'] }` — matching the pre-migration `app.js`'s gate (`calc.adjustments?.find((item) => item.target === target)`), rather than the broader `targetMeta?.series` flag (which would also fire on `ohm` and `divider`, calculators the old app never showed this block for). `led-resistor` is the only definition that declares `adjustments`, so this is the only view where the block is ever non-empty. `practicalValue` defaults to `nearestSeries(targetValue, 'E24')` so the block shows a real readout immediately, and `SeriesPicker`'s `onPick` is wired to `setPickedValue`, a real state setter — picking a specific value from the list overrides the default. (The old `app.js`'s separate free-text "practical value" override field is still not ported — see "Deliberate simplifications" at the end of this plan.)
+
+>>>>>>> origin/main
 - [ ] **Step 4: Run the test, confirm it passes**
 
 ```bash
@@ -1471,7 +1619,11 @@ import { DividerView } from '../../src/ui-react/calculators/DividerView';
 describe('DividerView', () => {
   it('solves Vout by default', () => {
     render(<DividerView />);
+<<<<<<< HEAD
     expect(screen.getByText('2.5 V')).toBeInTheDocument();
+=======
+    expect(screen.getByText('2.5 V', { selector: '.headline-value' })).toBeInTheDocument();
+>>>>>>> origin/main
   });
 
   it('warns when RL is set below 10x Rsource', () => {
@@ -1480,10 +1632,17 @@ describe('DividerView', () => {
     expect(screen.getByText(/load is now part of the divider/)).toBeInTheDocument();
   });
 
+<<<<<<< HEAD
   it('shows the nearest-standard-value picker when R1 is the target', () => {
     render(<DividerView />);
     fireEvent.change(screen.getByLabelText('Solve for'), { target: { value: 'R1' } });
     expect(screen.getByText('Nearest standard value')).toBeInTheDocument();
+=======
+  it('has no nearest-standard-value block, since divider.js declares no adjustments', () => {
+    render(<DividerView />);
+    fireEvent.change(screen.getByLabelText('Solve for'), { target: { value: 'R1' } });
+    expect(screen.queryByText('Adjust to nearest')).not.toBeInTheDocument();
+>>>>>>> origin/main
   });
 });
 ```
@@ -1506,7 +1665,10 @@ import { Headline } from '../widgets/Headline';
 import { CheckList } from '../widgets/CheckList';
 import { ResultGrid } from '../widgets/ResultGrid';
 import { FormulaTrace } from '../widgets/FormulaTrace';
+<<<<<<< HEAD
 import { SeriesPicker } from '../widgets/SeriesPicker';
+=======
+>>>>>>> origin/main
 import { eng } from '../engine';
 
 export function DividerView() {
@@ -1565,12 +1727,15 @@ export function DividerView() {
 
       <section className="panel result-panel">
         {target && <Headline label={target} value={computedDisplay ?? '—'} />}
+<<<<<<< HEAD
         {target && targetMeta?.series && (
           <div className="adjustment">
             <span className="adjustment-label">Nearest standard value</span>
             <SeriesPicker unit={targetMeta.unit} onPick={() => {}} />
           </div>
         )}
+=======
+>>>>>>> origin/main
         <CheckList checks={result.checks} />
         <ResultGrid values={result.values} vars={divider.vars} />
       </section>
@@ -1584,6 +1749,11 @@ export function DividerView() {
 }
 ```
 
+<<<<<<< HEAD
+=======
+`divider.js` declares no `adjustments`, so — same as `OhmView` — this view omits the "nearest standard value" block and its `SeriesPicker` import entirely, rather than gating on `targetMeta?.series` (which would incorrectly show it for `R1`/`R2`/`RL`, none of which `app.js` ever showed this block for).
+
+>>>>>>> origin/main
 - [ ] **Step 4: Run the test, confirm it passes**
 
 ```bash
@@ -1616,15 +1786,34 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { RegulatorView } from '../../src/ui-react/calculators/RegulatorView';
 
 describe('RegulatorView', () => {
+<<<<<<< HEAD
   it('solves P by default and shows Tj in the result grid', () => {
     render(<RegulatorView />);
     expect(screen.getByText('640 mW')).toBeInTheDocument(); // (9-0.8-5)*0.2
     expect(screen.getByText('57 °C')).toBeInTheDocument();
+=======
+  it('solves P by default and shows Tj in the formula trace', () => {
+    render(<RegulatorView />);
+    expect(screen.getByText('640 mW', { selector: '.headline-value' })).toBeInTheDocument(); // (9-0.8-5)*0.2
+    // Tj is derived-only (not the solved target), so it never appears in
+    // ResultGrid — only inside FormulaTrace's combined "expr = value" text
+    // node, hence a substring/regex match rather than an exact one.
+    expect(screen.getByText(/57 °C/)).toBeInTheDocument();
+>>>>>>> origin/main
   });
 
   it('warns when Tj passes Tjmax', () => {
     render(<RegulatorView />);
+<<<<<<< HEAD
     fireEvent.change(screen.getByLabelText('Load current'), { target: { value: '0.5' } });
+=======
+    // Tj = Ta + P*Rja = 25 + (Vs-Vd-Vout)*Iout*Rja; at the defaults
+    // (Vs=9, Vd=0.8, Vout=5, Rja=50) that's 25 + 3.2*Iout*50. Iout=0.5 only
+    // reaches 105 °C (below Tjmax=125 — this is regulator.js's own second
+    // documented example), so it needs to be pushed further: 0.7 A gives
+    // P=2.24 W, Tj=137 °C, safely past 125.
+    fireEvent.change(screen.getByLabelText('Load current'), { target: { value: '0.7' } });
+>>>>>>> origin/main
     expect(screen.getByText(/past 125/)).toBeInTheDocument();
   });
 
@@ -1756,7 +1945,11 @@ import { DiodeView } from '../../src/ui-react/calculators/DiodeView';
 describe('DiodeView', () => {
   it('solves Vafter by default', () => {
     render(<DiodeView />);
+<<<<<<< HEAD
     expect(screen.getByText('8.2 V')).toBeInTheDocument();
+=======
+    expect(screen.getByText('8.2 V', { selector: '.headline-value' })).toBeInTheDocument();
+>>>>>>> origin/main
   });
 
   it('warns when If exceeds Irated', () => {
@@ -1893,9 +2086,18 @@ describe('EseriesView', () => {
 
   it('switches series and recomputes', () => {
     render(<EseriesView />);
+<<<<<<< HEAD
     fireEvent.change(screen.getByLabelText('Series'), { target: { value: 'E12' } });
     // E12 nearest to 4780 is also 4700 (10*470 in E12), but confirm the output panel re-rendered
     expect(screen.getByText('4.7 kΩ')).toBeInTheDocument();
+=======
+    // E12 nearest to 4780 is also 4700 (10*470 in E12), so the "nearest value"
+    // readout alone can't tell E24 and E12 apart. bandLow genuinely differs
+    // between them (E24 tolerance is 5%, E12 is 10%), so assert on that instead.
+    expect(screen.getByText('4.46 kΩ')).toBeInTheDocument(); // E24 band low: eng(4700 * 0.95, 'ohm')
+    fireEvent.change(screen.getByLabelText('Series'), { target: { value: 'E12' } });
+    expect(screen.getByText('4.23 kΩ')).toBeInTheDocument(); // E12 band low: eng(4700 * 0.90, 'ohm')
+>>>>>>> origin/main
   });
 
   it('has no solve-for control', () => {
@@ -2062,7 +2264,11 @@ git commit -m "chore: retire src/ui/app.js now that the React UI is the only UI"
 
 ## Deliberate simplifications (not bugs, not forgotten)
 
+<<<<<<< HEAD
 - **The old "editable practical value" override** (a free-text field next to the E-series adjustment, letting you record e.g. "used 4k67 measured") is not ported. The new `SeriesPicker` widget shows the nearest standard value only. See the note in Task 6, Step 3 for how to restore it if wanted later.
+=======
+- **The old "editable practical value" override** (a free-text field next to the E-series adjustment, letting you record e.g. "used 4k67 measured") is not ported. What *is* restored (post final-review fix wave) is the nearest-value **display** itself: `LedResistorView` now defaults `practicalValue` to `nearestSeries(targetValue, 'E24')` so a real readout shows immediately, before any manual pick, and `SeriesPicker`'s `onPick` writes to a real `useState` rather than a no-op — picking a value from the list overrides the default. The block's trigger was also corrected back to the definition's own declared `adjustments` (matching the pre-migration `app.js`'s `calc.adjustments?.find((item) => item.target === target)` gate) rather than the broader `targetMeta?.series` flag it briefly used, which had widened it to `ohm` and `divider` as well — neither of which declares `adjustments` or showed this block before.
+>>>>>>> origin/main
 - **`FormulaTrace` is new UI, not a straight port.** The old `app.js` never rendered `result.trace` — it didn't exist before this session's `formula.js` hardening. Every view in this plan wires it up for the first time.
 - **`EseriesView` doesn't use most of the shared widget set** (no `Headline`, no `FormulaTrace`, no solve-for select) because `eseries` genuinely has no target/relation/trace. This is intended, not a gap — see Task 11's Interfaces note.
 - **Hash-based routing (`#/ohm?V=5&R=100`) is out of scope for this plan.** The old `app.js` didn't have it either, despite `PLAN.md` §5 floating it as a future nicety tied to phase 6/8 (bookmarkable state, "most of saved scenarios for twenty lines"). `App.tsx`'s `activeId` state is a plain `useState`, not synced to the URL. If it's wanted, it's a follow-on task: swap `useState` for a small `useSyncExternalStore` on `window.location.hash`, or reach for a router — deliberately not decided here to avoid pulling in a dependency this plan doesn't otherwise need.

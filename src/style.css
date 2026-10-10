@@ -398,6 +398,7 @@ code {
   font-size: 13px;
 }
 
+<<<<<<< HEAD
 .check.info {
   border: 1px solid var(--rule);
   background: var(--panel);
@@ -459,6 +460,8 @@ code {
   fill: var(--accent);
 }
 
+=======
+>>>>>>> origin/main
 .check.fail {
   border-left-color: var(--fail);
   background: var(--fail-soft);

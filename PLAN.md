@@ -52,25 +52,35 @@ bench-calc/
       ohm.js
       led-resistor.js
       ...                    one file per calculator, pure data
-    ui/
-      app.js                 state, hash routing
-      render.js              tagged-template -> DOM, no vdom
-      components.js          field, result row, check banner, formula card
-    style.css                custom properties, light + dark
+    ui-react/                   React + TypeScript UI (see docs/superpowers/plans/2026-09-20-react-typescript-ui.md)
+      engine.ts                  the only file touching the plain-JS engine directly
+      types.ts                   CalculatorDefinition, RunResult, and friends
+      App.tsx / main.tsx         shell — sidebar + all calculator views
+      hooks/useCalculatorForm.ts field/target state + memoized runDefinition call
+      widgets/                   Field, SeriesPicker, Headline, CheckList, ResultGrid, FormulaTrace, Sidebar
+      calculators/               one *View.tsx per calculator, plus definitions.ts (typed src/calc/*.js re-exports)
+    style.css                  custom properties, light + dark
   test/
     units.test.js
     expr.test.js
     solve.test.js
     definitions.test.js      sweeps every calculator
+  test-ui/                  vitest + React Testing Library, for src/ui-react
+    setup.ts
+    widgets/
+    calculators/
   tools/
     precache.sh              regenerates the sw.js file list
   PLAN.md
 ```
 
-No bundler. ES modules load natively; they need `http://`, not `file://`, so dev
-is `python3 -m http.server 8080` and that is the whole toolchain. Tests run on
-`node --test test/` — built into Node, understands ES modules, needs nothing
-installed.
+`src/engine/` and `src/calc/` stay plain ES modules with no build step — tests
+run on `node --test test/`, built into Node, needs nothing installed. The UI
+(`src/ui-react/`) is React + TypeScript, built and served by Vite: `npm run dev`
+for local development, `npm run build` for a production bundle, `npm run
+test:ui` for its component tests. See CLAUDE.md invariant 3 and
+`docs/superpowers/plans/2026-09-20-react-typescript-ui.md` for the full
+rationale.
 
 ---
 
