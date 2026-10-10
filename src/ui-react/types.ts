@@ -26,7 +26,7 @@ export interface OutputItem {
 
 export interface CheckDefinition {
   when: string;
-  level: 'warn' | 'fail';
+  level: 'warn' | 'fail' | 'info';
   text: string;
 }
 
@@ -84,4 +84,19 @@ export interface RunResult {
   trace: TraceStep[];
   fieldErrors: FieldError[];
   valid: boolean;
+  diagram?: ResistorDiagram | null;
+}
+
+export interface DiagramPart {
+  id: string;
+  label: string;
+  value: number;
+  text: string;
+}
+
+export interface ResistorDiagram {
+  kind: 'resistors';
+  topology: 'series' | 'parallel';
+  parts: DiagramPart[];
+  total: DiagramPart | null;
 }

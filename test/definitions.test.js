@@ -114,7 +114,6 @@ for (const definition of calculators) {
         }
       }
 
-<<<<<<< HEAD
       if (definition.diagram) {
         const { kind, topology, parts, total } = definition.diagram;
         assert.equal(kind, 'resistors', `${definition.id} diagram kind ${kind} is not one the UI draws`);
@@ -136,10 +135,6 @@ for (const definition of calculators) {
         if (definition.diagram) {
           assert.ok(result.diagram, `${definition.id} example ${JSON.stringify(example.given)} drew no diagram`);
         }
-=======
-      for (const example of definition.examples) {
-        const result = runDefinition(definition, example.given);
->>>>>>> origin/main
         for (const [key, expected] of Object.entries(example.expect)) {
           assert.ok(Object.hasOwn(result.derived, key) || Object.hasOwn(result.values, key),
             `${definition.id} did not produce ${key}`);

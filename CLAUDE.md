@@ -145,15 +145,12 @@ equations. A definition opts out of the relation/solve-for machinery with
 numeric field — the UI renders it as a `<select>`. See `src/calc/eseries.js`
 for the reference implementation; `capcode` should follow the same shape.
 
-<<<<<<< HEAD
 A procedure may also carry a `diagram` block — e.g. `{ kind: 'resistors',
 topology: '<mode var or series|parallel>', parts: [{ id, label }], total }` —
 which the runner resolves into `result.diagram` with concrete values. The UI
 draws whatever kind it is handed and nothing else; `src/calc/ecombo.js` is the
 example. A diagram with a missing part resolves to `null`, never half-drawn.
 
-=======
->>>>>>> origin/main
 ## One thing not yet decided
 
 - **Tolerance propagation.** Nothing currently tracks that Rthja is ±20 %. Out

@@ -81,8 +81,6 @@ test('formula runner emits a worked-arithmetic trace from the same AST as the an
   assert.match(relationStep.substituted, /100/);
   close(relationStep.value, result.values[result.target]);
 });
-<<<<<<< HEAD
-
 test('procedure diagram resolves topology and part values', () => {
   const result = runDefinition(ecombo, { t: '2350', series: 'E24', topology: 'parallel' });
   assert.equal(result.diagram.kind, 'resistors');
@@ -96,5 +94,3 @@ test('procedure diagram is withheld rather than half-drawn', () => {
   assert.equal(runDefinition(ecombo, { t: 'junk', series: 'E24', topology: 'series' }).diagram, null);
   assert.equal(runDefinition(ohm, { V: '5', R: '1k' }, { solveFor: 'I' }).diagram, undefined);
 });
-=======
->>>>>>> origin/main

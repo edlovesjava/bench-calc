@@ -50,15 +50,10 @@ Series tables: E12 `10 12 15 18 22 27 33 39 47 56 68 82`; E24 `10 11 12 13 15 16
 
 Examples: `t=4780, E24` → nearest `4700`, error `-1.67 %`.
 
-<<<<<<< HEAD
-Status: E12/E24 only, as the first calculator through the `kind: procedure`
-escape hatch. E96 is not ported yet.
-=======
 Status: `src/calc/eseries.js` currently implements nearest-value + error + the
 tolerance band for E12/E24 only, as the first calculator through the
-`kind: procedure` escape hatch. E96 and the parallel-pair minimisation are not
-ported yet.
->>>>>>> origin/main
+`kind: procedure` escape hatch. E96 is not ported yet. Two-part series and
+parallel combinations are implemented separately in `src/calc/ecombo.js`.
 
 Note: the tolerance band is wider than the gap to the next series value. A 5 %
 4.7 k can legitimately measure 4.47–4.94 k.

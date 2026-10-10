@@ -152,7 +152,6 @@ function runRelation(definition, input, options) {
   };
 }
 
-<<<<<<< HEAD
 const TOPOLOGIES = new Set(['series', 'parallel']);
 
 /**
@@ -187,8 +186,6 @@ function resolveDiagram(definition, scope, unitForName) {
   return { kind: spec.kind, topology, parts, total };
 }
 
-=======
->>>>>>> origin/main
 function runProcedure(definition, input) {
   const { values, fieldErrors } = resolveVars(definition, input, null);
   const unitForName = unitLookup(definition);
@@ -196,11 +193,7 @@ function runProcedure(definition, input) {
   if (fieldErrors.length > 0) {
     return {
       definition, values, derived: {}, relation: null, target: null,
-<<<<<<< HEAD
       checks: [], trace: [], fieldErrors, valid: false, diagram: null,
-=======
-      checks: [], trace: [], fieldErrors, valid: false,
->>>>>>> origin/main
     };
   }
 
@@ -217,10 +210,7 @@ function runProcedure(definition, input) {
   return {
     definition, values, derived, relation: null, target: null,
     checks, trace: [], fieldErrors, valid,
-<<<<<<< HEAD
     diagram: resolveDiagram(definition, scope, unitForName),
-=======
->>>>>>> origin/main
   };
 }
 

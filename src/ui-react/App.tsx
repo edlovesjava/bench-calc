@@ -7,6 +7,7 @@ import { DividerView } from './calculators/DividerView';
 import { RegulatorView } from './calculators/RegulatorView';
 import { DiodeView } from './calculators/DiodeView';
 import { EseriesView } from './calculators/EseriesView';
+import { EcomboView } from './calculators/EcomboView';
 
 export function App() {
   const [activeId, setActiveId] = useState(calculators[0].id);
@@ -25,6 +26,7 @@ export function App() {
         <div style={{ display: activeId === 'regulator' ? 'block' : 'none' }}><RegulatorView /></div>
         <div style={{ display: activeId === 'diode' ? 'block' : 'none' }}><DiodeView /></div>
         <div style={{ display: activeId === 'eseries' ? 'block' : 'none' }}><EseriesView /></div>
+        <div style={{ display: activeId === 'ecombo' ? 'block' : 'none' }}><EcomboView /></div>
       </main>
     </div>
   );
