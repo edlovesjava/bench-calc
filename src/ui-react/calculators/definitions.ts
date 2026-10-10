@@ -15,6 +15,8 @@ import regulatorRaw from '../../calc/regulator.js';
 import diodeRaw from '../../calc/diode.js';
 // @ts-expect-error
 import eseriesRaw from '../../calc/eseries.js';
+// @ts-expect-error
+import ecomboRaw from '../../calc/ecombo.js';
 
 export const ohm = ohmRaw as CalculatorDefinition;
 export const ledResistor = ledResistorRaw as CalculatorDefinition;
@@ -22,7 +24,8 @@ export const divider = dividerRaw as CalculatorDefinition;
 export const regulator = regulatorRaw as CalculatorDefinition;
 export const diode = diodeRaw as CalculatorDefinition;
 export const eseries = eseriesRaw as CalculatorDefinition;
+export const ecombo = ecomboRaw as CalculatorDefinition;
 
 export const calculators: CalculatorDefinition[] = [
-  ohm, ledResistor, divider, regulator, diode, eseries,
+  ohm, ledResistor, divider, regulator, diode, eseries, ecombo,
 ];

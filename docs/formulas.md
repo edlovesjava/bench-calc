@@ -1,4 +1,4 @@
-# The 18 calculators
+# The 19 calculators
 
 Source of truth for `src/calc/*.js`. Each entry below maps one-to-one onto a
 definition file; phase 7 is transcription, not design.
@@ -25,7 +25,7 @@ Full context for any entry — the prose, the diagrams, the reasoning — is in
 
 ## Units & parts
 
-### `eseries` — E-series and combos
+### `eseries` — E-series nearest value
 `kind: procedure`
 
 | var | unit | label | default |
@@ -35,11 +35,14 @@ Full context for any entry — the prose, the diagrams, the reasoning — is in
 Modes: `E24` (5 %), `E12` (10 %), `E96` (1 %).
 
 Procedure: nearest value minimises `abs(ln(Rn / t))` over the series scaled
-across the decades around `t`. Parallel pair minimises `abs(Ra*Rb/(Ra+Rb) - t)`
-over E24 candidates.
+across the decades around `t`.
 
 Outputs: nearest series value; error `(Rn - t) / t`; the tolerance band
-`Rn * (1 ± tol)`; closest E24 parallel pair `Ra ∥ Rb` with its own error.
+`Rn * (1 ± tol)`.
+
+Checks:
+- warn `abs(error) > 0.1` — more than 10 % off; check the series and decade
+- info `abs(error) > 0.005` — points at `ecombo` for a closer two-part answer
 
 Series tables: E12 `10 12 15 18 22 27 33 39 47 56 68 82`; E24 `10 11 12 13 15 16
 18 20 22 24 27 30 33 36 39 43 47 51 56 62 68 75 82 91`; E96 is the standard
@@ -49,11 +52,42 @@ Examples: `t=4780, E24` → nearest `4700`, error `-1.67 %`.
 
 Status: `src/calc/eseries.js` currently implements nearest-value + error + the
 tolerance band for E12/E24 only, as the first calculator through the
-`kind: procedure` escape hatch. E96 and the parallel-pair minimisation are not
-ported yet.
+`kind: procedure` escape hatch. E96 is not ported yet. Two-part series and
+parallel combinations are implemented separately in `src/calc/ecombo.js`.
 
 Note: the tolerance band is wider than the gap to the next series value. A 5 %
 4.7 k can legitimately measure 4.47–4.94 k.
+
+### `ecombo` — E-series combos
+`kind: procedure`
+
+| var | unit | label | default |
+|---|---|---|---|
+| `t` | ohm | Target resistance | `4780` |
+
+Modes: series `E24` / `E12`; topology `series` / `parallel`.
+
+Procedure: series minimises `abs(Ra + Rb - t)` over parts in `[t/1000, t]`;
+parallel minimises `abs(Ra*Rb/(Ra+Rb) - t)` over parts in `[t, 1000 t]`, both
+drawn from the selected series. `Ra >= Rb`. Ties go to the more balanced split
+(larger `Rb`), which is less sensitive to either part's tolerance. No pair
+available → no outputs, never a guess.
+
+Outputs: `Ra`, `Rb`, the combined value, its error `(R - t) / t`, and the best
+error the *other* topology would reach.
+
+Diagram: two resistors drawn in the selected topology, labelled with `Ra`,
+`Rb` and the combined value (`diagram` block, kind `resistors`).
+
+Checks:
+- info `abs(error) < 1e-9` — exact
+- warn `abs(error) > 0.01` — best pair still more than 1 % off; check the decade
+- info `abs(otherError) < abs(error)` — the other topology gets closer
+
+Examples: `t=4780, E24` → series `4700 + 82 = 4782`; parallel
+`75k ∥ 5.1k = 4775`. `t=6800, E12, series` → `5600 + 1200`, exact.
+`t=2350, E24, parallel` → `4700 ∥ 4700`, exact (series is also exact:
+`1600 + 750`).
 
 ### `capcode` — Capacitor code decoder
 `kind: procedure`

@@ -13,7 +13,7 @@ no network.
 
 1. `PLAN.md` — build order, phase exit criteria, the reasoning behind the
    architecture, known risks.
-2. `docs/formulas.md` — all 18 calculators as structured data: relation,
+2. `docs/formulas.md` — all 19 calculators as structured data: relation,
    variables with units, derived values, warning thresholds, worked examples.
    This is what phases 4 and 7 transcribe from.
 3. `docs/design.md` — tokens, layout anatomy, accessibility rules. What
@@ -144,6 +144,12 @@ equations. A definition opts out of the relation/solve-for machinery with
 (`kind: 'mode'`) is a fixed set of string options rather than a parsed
 numeric field — the UI renders it as a `<select>`. See `src/calc/eseries.js`
 for the reference implementation; `capcode` should follow the same shape.
+
+A procedure may also carry a `diagram` block — e.g. `{ kind: 'resistors',
+topology: '<mode var or series|parallel>', parts: [{ id, label }], total }` —
+which the runner resolves into `result.diagram` with concrete values. The UI
+draws whatever kind it is handed and nothing else; `src/calc/ecombo.js` is the
+example. A diagram with a missing part resolves to `null`, never half-drawn.
 
 ## One thing not yet decided
 

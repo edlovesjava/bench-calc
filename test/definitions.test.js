@@ -114,8 +114,27 @@ for (const definition of calculators) {
         }
       }
 
+      if (definition.diagram) {
+        const { kind, topology, parts, total } = definition.diagram;
+        assert.equal(kind, 'resistors', `${definition.id} diagram kind ${kind} is not one the UI draws`);
+        const fixed = topology === 'series' || topology === 'parallel';
+        const mode = definition.vars?.[topology];
+        assert.ok(fixed || mode?.kind === 'mode',
+          `${definition.id} diagram topology must be 'series', 'parallel', or a mode var`);
+        for (const option of fixed ? [] : mode.options) {
+          assert.ok(option === 'series' || option === 'parallel',
+            `${definition.id} diagram topology var offers '${option}', which cannot be drawn`);
+        }
+        for (const item of [...parts, ...(total ? [total] : [])]) {
+          assert.ok(knownIds.has(item.id), `${definition.id} diagram uses unknown identifier ${item.id}`);
+        }
+      }
+
       for (const example of definition.examples) {
         const result = runDefinition(definition, example.given);
+        if (definition.diagram) {
+          assert.ok(result.diagram, `${definition.id} example ${JSON.stringify(example.given)} drew no diagram`);
+        }
         for (const [key, expected] of Object.entries(example.expect)) {
           assert.ok(Object.hasOwn(result.derived, key) || Object.hasOwn(result.values, key),
             `${definition.id} did not produce ${key}`);
